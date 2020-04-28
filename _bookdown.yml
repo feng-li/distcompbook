@@ -1,0 +1,23 @@
+output_dir: "textbook"
+clean: [packages.bib, bookdown.bbl]
+new_session: true
+book_filename: 'distcompbook'
+language:
+  label:
+    thm: '定理'
+    def: '定义'
+    exm: '例'
+    proof: '证明: '
+    solution: '解: '
+    fig: '图'
+    tab: '表'
+  ui:
+    edit: "编辑"
+    chapter_name: ["第 ", " 章"]
+delete_merged_file: true
+before_chapter_script: "before-each-chapter.R"
+rmd_files: ["index.Rmd"
+ ,"00-author.Rmd"
+ ,"01-R.Rmd"
+]
+
