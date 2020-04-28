@@ -1,8 +1,7 @@
 ```{r refsheader, echo=FALSE}
 cover <- ifelse(grepl("html",knitr:::pandoc_to()),
-   "authors.Rmd", "donothing.Rmd")
+   "authors.Rmd", "null.Rmd")
 ```
 
 ```{r cover, child=cover, dependson='refsheader'}
 ```
-
