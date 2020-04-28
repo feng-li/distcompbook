@@ -9,6 +9,7 @@ description: "分布式存储与计算教材。"
 bibliography: [distcomp.bib]
 biblio-style: apalike
 link-citations: yes
+indent: true
 colorlinks: yes
 lot: yes
 lof: yes

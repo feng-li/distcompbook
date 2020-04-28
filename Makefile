@@ -6,8 +6,11 @@ gitbook:
 watch:
 	xdg-open textbook/index.html; while inotifywait -e modify *.Rmd; do make gitbook; done
 
+pdf:
+	Rscript -e 'bookdown::render_book("index.Rmd", "bookdown::pdf_book", quiet=FALSE)'
+
 deploy:
-	rsync -avp textbook/ feng.li:feng/distcompbook/
+	rsync -avp --del textbook/ feng.li:feng/distcompbook/
 
 clean:
 	rm -rf textbook
