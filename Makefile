@@ -2,10 +2,9 @@ all: gitbook
 
 gitbook:
 	Rscript -e 'bookdown::render_book("index.Rmd", "bookdown::gitbook", quiet=FALSE)'
-	# sed -i -f htmlreplace.sed public/*.html
 
 watch:
-	while inotifywait -e modify -r .; do make gitbook; done
+	xdg-open textbook/index.html; while inotifywait -e modify *.Rmd; do make gitbook; done
 
 deploy:
 	rsync -avp textbook/ feng.li:feng/distcompbook/

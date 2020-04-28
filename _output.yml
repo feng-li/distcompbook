@@ -1,11 +1,14 @@
 bookdown::gitbook:
   toc_depth: 3
   css: css/style.css
+  includes:
+    in_header: header.html
   config:
     toc:
       collapse: none
       before: |
         <li><a href="./">分布式存储与计算</a></li>
+        <script type="text/javascript" src="http://livejs.com/live.js"></script>
       after: |
         <li><a href="https://bookdown.org" target="blank">本书由 bookdown 强力驱动</a></li>
     download: [pdf, epub]
