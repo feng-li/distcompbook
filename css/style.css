@@ -1,3 +1,7 @@
+p {
+  text-indent: 2em;
+}
+
 p.caption {
   color: #777;
   margin-top: 10px;
@@ -37,7 +41,7 @@ blockquote > p:first-child {
     top:0px;
     font-size: 45px;
  }
- 
+
 
 .method {
   padding: 1em 1em 1em 4em;
