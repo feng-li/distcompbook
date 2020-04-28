@@ -17,7 +17,6 @@ language:
 delete_merged_file: true
 before_chapter_script: "before-each-chapter.R"
 rmd_files: ["index.Rmd"
- ,"00-author.Rmd"
- ,"01-R.Rmd"
+ ,"00-authors.Rmd"
+ ,"01-Introduction.Rmd"
 ]
-

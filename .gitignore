@@ -3,4 +3,6 @@
 .Rhistory
 .RData
 .Ruserdata
+distcompbook.rds
 _bookdown_files/**
+textbook/**

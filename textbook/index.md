@@ -6,7 +6,7 @@ author:
 date: "2020-04-28"
 documentclass: ctexbook
 description: "分布式存储与计算教材。"
-bibliography: [mybib.bib]
+bibliography: [distcomp.bib]
 biblio-style: apalike
 link-citations: yes
 colorlinks: yes
@@ -23,8 +23,3 @@ github-repo: feng-li/distcompbook
 
 
 本书正在撰写中，但你会不定期地发现惊喜。
-
-
-
-
-
