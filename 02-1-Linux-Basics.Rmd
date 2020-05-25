@@ -1,0 +1,134 @@
+# Linux基础
+目前，所有分布式系统都部署在Linux系统中，对分布式系统进行的任何操作都需要使用Linux，因此
+需要对Linux系统进行学习，掌握Linux的使用技能。
+
+## Linux历史
+Linux是一个内核，而不是操作系统，基于Linux内核开发的Ubuntu、Fedora等才是操作系统。Linux是
+由当时身为学生的Linus Torvalds于1991年开发的。二十世纪七十年代，KenThompson、
+Dennis Ritchie等人在AT&T的贝尔实验室开发出Unix操作系统，Unix操作系统，是一个强大的多用户、
+多任务操作系统，其支持多种处理器架构，属于分时操作系统。1984年，由于AT&T政策的改变，
+在Version 7 Unix推出之后不再对学生提供源代码，为了教学的需要，Andrew S. Tanenbaum教授
+开发了一个不包含任何AT&T源代码的类Unix操作系统，命名为Minix。几乎与此同时，
+Richard Stallman发起以创建一套完全自由的操作系统为目标的GUN项目，并创建GNU通用公共许可证
+GPL(General Public License)。1991年，芬兰赫尔辛基大学的学生Linus Torvalds受到
+Minix操作系统的启发基于GUN项目的gcc、bash开发了针对386机器的Lniux内核，并将其发布于网络。
+此内核代码一经发出便受到大量关注，此后大量程序员参与了Linux内核代码的编写修改工作，
+1994年3月，Linux1.0按照完全自由免费的协议发布，随后正式采用GPL协议。作为类Unix系统，Linux
+具有与Unix系统类似的程式界面与操作方式，也继承了Unix稳定高效率的特点。但与Unix相比，Linux
+支持多种硬件平台，且完全免费，用户可以免费获得和修改源代码，因此Linux逐渐取代Unix成为非常
+受人欢迎的作业系统。
+
+## 为什么使用Linux
+Linux是一个免费的开源操作系统,用户可以免费获得源代码并按照自己的要求进行修改，且除了部分商用
+版本外，大部分Linux发行版本几乎都是免费提供的。此外，Linux适用于多种硬件平台，还是一种嵌入式
+操作系统。Linux支持多用户，用户对自己的文件有特殊的权利，保证各个用户之间互不影响。Linux发行
+版提供了大多数的分布式软件，很多的分布式系统都是基于Linux开发的。
+
+## Linux基础操作
+学习Linux前要了解进入Linux的方法，对于Windows用户，需要使用SSH客户端(如PUTTY或Xshell)登录到
+Linux；对于Mac或Linux用户，可使用系统终端登录服务器ssh yourusername@your.server.address
+登录到Linux。
+
+登录到Linux服务器后，可以进行一系列基础操作。
+想要查看当前用户可使用命令
+
+       whoami
+
+想要查看目前所在位置可使用命令
+
+       pwd
+
+查看当前目录下文件列表可使用命令
+
+       ls
+
+ls命令默认输出当前目录下内容，不会递归输出，默认不输出以'.'开头的隐藏文件，且默认仅输出文件名，
+文件以字母顺序排序。
+查看当前目录下所有按修改时间排列的文件列表具体信息可使用命令
+
+       ls -htla 
+
+其中，`-h`指以人类可读的方式显示文件的大小，如使用'M'兆字节表示大小；`-t`指按修改时间排序，
+默认时间最新的优先排列；`-l`指打印除了每个文件的名称之外的其他具体信息，如文件类型、时间戳、
+文件大小、所有者名称、组名、硬链接数以及文件读写权限，通常文件大小以字节计数形式输出；`-a`指
+输出所有文件信息，包括以'.'开头的隐藏文件。
+
+想要移动至其他目录可使用命令`cd`，如移动至example目录下
+
+       cd example
+
+想要查看帮助，如查看`ls`命令帮助，可使用命令
+
+       man ls
+
+该命令显示了Linux中`ls`命令的标准解释，若想获知该命令的简短帮助，可使用命令
+
+       ls --help
+
+
+除以上基本操作外，可以对Linux内的文件进行一系列操作。
+创建文件夹可使用命令`mkdir`，如创建exmaple文件夹
+
+       mkdir example
+
+创建新文件可使用命令`touch`，如创建markword文件README
+
+       touch README.md
+
+重命名文件可使用命令`mv`，如将README.md文件重命名为README.txt文件
+
+       mv README.md README.txt
+
+复制文件可使用命令`cp`，如使用README.md文件复制一份README.txt文件
+
+       cp README.md README.txt
+
+删除文件可使用命令`rm`，如删除README.md文件
+
+       rm README.md
+
+删除文件夹也可使用命令`rm`，如删除example文件夹
+
+       rm -rf example
+
+其中，`-r`指递归删除列出的目录及其内容；`-f`指忽略不存在的文件和缺少的操作数，并且永远不要提示用户
+
+
+Linux内对文件进行编辑需要借助文本编辑器，Linux支持的文本编辑器都是从Unix继承下来的，在使用时需要
+记住常见文本编辑器命令。Linux内常用的文本编辑器主要有`nano`，`vim`，`emacs`。
+
+`nano`是最简单方便的文本编辑器，需要对文件README.md进行编辑使用命令
+ 
+       nano README.md
+
+使用'Ctrl+O'对文件进行保存，使用'Ctrl+X'可退出文件编辑。
+
+Vim是一个高度可配置的文本编辑器，旨在实现高效的文本编辑。它是大多数UNIX系统上原始的vi编辑器的改
+进版本。Vim通常被称为“程序员的编辑器”，对编程非常有用，但是，除用作编程外，Vim也非常适合进行各种
+文本编辑， 可以进行撰写电子邮件和编辑配置文件等工作，是Linux标配的文件编辑器。
+需要对文件README.md进行编辑使用命令
+
+       vim README.md
+
+使用`vim`进行文件编辑时，未编写行会显示'~'符号，输入时左下角显示'INSERT'。保存时按Esc键进入命令
+模式，输入英文冒号后输入'wq!'即可保存并退出编译。
+
+Emacs是著名的集成开发环境和文本编辑器，被公认为是最受专业程序员喜爱的代码编辑器之一。
+Emacs是Editor MACroS（编辑器宏）的缩写，它的核心是Emacs Lisp，Emacs Lisp是Lisp编程语言的一种，
+具有支持文本编辑的扩展功能。Emacs的出现早于Linux,最初于1976年在MIT AI Lab的不兼容分时系统（ITS）
+上作为TECO宏的集合而实现。自诞生以来，Emacs演化出了众多分支，其中使用最广泛的两种是：1984年由
+Richard Stallman发起并维护至今的GNU Emacs，以及1991年发起的XEmacs。XEmacs是GNU Emacs的分支，
+至今仍保持着相当的兼容性。
+Emacs不仅仅是一个编辑器，也是一个集成开发环境，用户可以使用Emacs进行收发邮件，调试程序，玩游戏，
+进入讨论组，浏览网站等行为，在基于编辑器的功能基础上，Emacs自行开发了一个“bourne-shell-like”的
+Eshell。
+需要对文件README.md进行编辑使用命令
+
+       emacs README.md
+
+使用'emacs'编译的文件在没有保存时左下角出现两个星号(**),保存时使用'Ctrl+X'调出可执行快捷键，再使
+用'Ctrl+S'快捷键进行保存。退出'emacs'编译界面使用'Ctrl+X'，'Ctrl+C'快捷键进行操作。
+'emacs'提供菜单栏，可以使用'F10'进行调用。用户可使用菜单栏Help内的帮助文件Emacs Tutorial了解
+Emacs的使用方式和快捷键。
+
+
