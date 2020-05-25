@@ -1,0 +1,671 @@
+---
+bibliography:
+- 'ref.bib'
+---
+
+Hadoop 基础
+===========
+
+Hadoop历史、生态系统
+--------------------
+
+### Hadoop 简介
+
+在这个大数据爆发的时代，人们在利用手机和电脑进行社交、购物、网络游戏等活动时会产生大量的
+数据，公司的交易、财务记录，保险公司的保险记录等等每天都会留下大量的信息，现在很多公司每天
+产生的信息量已经从 TB级上升到PB
+级，面对如此浩瀚的数据，如何对其进行更有效的存储
+并从中探索出数据的规律，成为了数据工程师们面对的难题。
+
+传统的数据仓库和OLAP(Online Analytical
+Processing)的分析模式在海量数据前显得苍白无力，
+基于分布式思维构建的Hadoop则给出了一个很好的解决方案。Hadoop是Apache软件基金下的一个开
+源的分布式计算平台。它可以运行在成千上万个普通机器的节点组成的集群上，并通过分布式的计算模型
+和存储模型来处理大数据集。Hadoop分布式文件系统（Hadoop Distributed File
+System）和 MapReduce(Google MapReduce
+的开源实现)为用户提供了底层的分布式基础架构和分布式并行处理
+的程序支持。Hadoop具有高扩展性、高效性、高容错性和低成本等优点，现在已经有越来越多的
+公司选择Hadoop作为自己的大数据处理分析工具。
+
+### Hadoop 的历史
+
+Hadoop 起源于2002年的Apache Nutch项目，是Apache Lucene创始人Doug
+Cutting创建
+的，他对Hadoop这一名称的来历这样解释："这个名字是我的孩子给一头吃饱了的棕黄色大象起的。我的
+命名标准是简短，容易发音和拼写，没有太多的含义，并且不会被用于别处。"因此，我们现在看
+到Hadoop
+的图标都是大象了。除此之外，Hadoop的其他子项目也秉承了这一传统，如"Pig"就是动物的名
+字。
+
+在Nutch项目中，开发者发现他们的网页爬取工具和搜索引擎不能解决数十亿网页的搜索问题。2003年
+谷歌发表的一篇论文（即为谷歌的分布式文件系统GFS）为他们提供了很多思路，2004年他们开发了自己
+的分布式文件系统（NDFS）。2004年谷歌又发表论文介绍他们自己的 MapReduce
+系统。2005年，Nutch 的开发人员在Nutch 上实现了一个MapReduce 系统。
+在2006年2月，开发人员 将NFDS 和MapReduce 移出Nutch 形成 Lucene
+的一个子项目，成为Hadoop并且最终成为了Apache基
+金会的顶级项目。截止到2018年10月份，Hadoop 的版本已经更新到3.1.1。
+
+Hadoop 2.0版本指的是Apache Hadoop 0.23.x、2.x 或者CDH4
+系列的Hadoop，相比Hadoop 1.0 ，Hadoop 2.0
+在HDFS的架构与MapReduce上都有较大的变化，且速度上和可用性上都有了很大的提
+高。主要有两方面的改进：第一，HDFS的NameNodes可以以集群的方式布署，增强了NameNodes的水平扩
+展能力和可用性；第二，MapReduce将JobTracker中的资源管理及任务生命周期管理（包括定时触发及
+监控），拆分成两个独立的组件，并更名为YARN（Yet Another Resource
+Negotiator）。其中，YARN
+是一个资源管理系统，它主要负责集群资源管理和调度，而Mapreduce
+则是运行在YARN 上的离线处理框 架，它与Hadoop 1.0 中的Mapreduce
+在编程模型（新旧API）和数据处理引擎 （MapTask 和 ReduceTask
+）两方面是相同的。Hadoop 2.0（YARN）允许每个节点（NodeManager）配置
+可用的CPU和内存资源总量，而中央调度器则会根据这些资源总量分配给应用程序。为了更好地分配与利
+用资源，YARN允许管理员根据实际需要和CPU性能将每个物理CPU划分成若干个虚拟CPU，同时也可以单独
+配置每个节点需要的虚拟CPU个数，还有一种方法是在用户提交应用程序时，也可指定每个任务需要的虚
+拟CPU个数。同时，Hadoop
+2.0还引入了基于Cgroups的轻量级资源隔离方案，这大大降低了同节点上任
+务间的相互干扰，而Hadoop 1.0仅采用了基于JVM的资源隔离，粒度非常粗糙。
+
+### Hadoop与传统集群的比较
+
+Hadoop的本质是一种专门为存储和分析海量非结构化数据而设计的特定类型的计算集群，相较于以往的传统集群而言，Hadoop在很多方面都存在优势，这也是目前Hadoop被广泛应用的重要原因之一。具体体现在以下几个方面：
+
+一、适合处理海量大数据。Hadoop的工作原理在于将数据拆分成片，然后将每个"分片"分配到特定的集群节点上进行分析。其对数据的均匀分布没有要求，因为每个"分片"都是在独立的集群节点上被单独处理的。Hadoop对于海量大数据的适用性体现容量规模和数据多样性两个方面：传统集群在容量规模方面一般是实现由GB到TB的转变，Hadoop集群则实现了由GB到TB再到PB及以上的转变；此外，传统集群大多仅适用于结构化数据，而Hadoop集群可以适用于结构化数据、半结构化数据和非结构化数据。
+
+二、灵活的可拓展性。大数据分析中面临的一个重要问题是数据量的不断增加，很多应用场景下需要对其进行实时或接近实时地分析处理。虽然并行处理可以极大提高分析速度，但是随着数据量的增加，处理速度仍然可能受到影响。然而，Hadoop集群通过添加集群节点可以有效地拓展集群，这也使得Hadoop具有灵活的可拓展性。
+
+三、高容错能力。在Hadoop中，当一个分片数据被发送到某个集群节点时，会自动拷贝一份数据副本存放到集群的其它节点上。通过这种方式，即使一个节点发生了故障，该节点存放的数据仍可以在其它节点上获取得到，不会影响到对该数据的分析处理。相对而言，传统集群的容错能力完全取决于关键节点，对大量数据的备份和恢复均较为困难。
+
+四、低成本。一方面，Hadoop集群所需的软件是开源的，可以自由下载Apache
+Hadoop发行版，而传统集群的软件采购成本及后续服务费很高；另一方面，Hadoop集群支持商用硬件，不需要购买服务器级硬件，而传统集群对服务器配置的要求很高。
+
+五、应用价值高。传统集群侧重的是数据的操作性，同时兼顾统计报表；Hadoop集群更关注数据的业务决策价值，强调数据挖掘与综合分析。
+
+### Hadoop 的生态系统
+
+Hadoop 的两大核心是HDFS 和MapReduce。整个的Hadoop 的体系结构主要通过HDFS
+实现分布式存储的底 层支持，通过MapReduce
+实现分布式并行处理的程序支持。但是在Hadoop 上还有Hive 、Hbase 、Pig
+、Zookeeper 、 Chukwa 、Avro 等项目：其中Hive 是建立在Hadoop
+上的数据仓库，它提供了类SQL语句来实现对Hadoop 文件中的
+数据进行整理、特殊查询和分析存储，避免了用户进行大量的编码工作；Hbase
+是一个分布式的面向列的开源数据
+库，主要用于需要随机访问、实时读写的大数据；Pig
+是一个对大型数据集进行分析、评估的平台，它最突出
+的优势是它的结构能够经受住高度并行化的检验，这一功能使得它能处理大型的数据集；ZooKeeper是
+一个分布式的，开放源码的分布式应用程序协调服务，是Hadoop和Hbase的重要组件，它是一个为分
+布式应用提供一致性服务的软件，提供的功能包括：配置维护、名字服务、分布式同步、组服务等；
+Chuwa
+是开源的数据收集系统，用于监控和分析大型分布式系统的数据；Avro是新的数据序列
+化格式与传输工具，将逐步取代Hadoop原有的IPC机制。
+
+分布式文件系统（HDFS）
+----------------------
+
+### HDFS 简介
+
+Hadoop 的分布式文件系统HDFS（Hadoop Distributed File System）是Hadoop
+的主要的存储系 统。Hadoop
+是一个综合性的文件系统抽象，它提供了文件系统实现的各种接口。而我们本节要讲
+的HDFS只是其中的一个实现。HDFS
+不仅可用来创建、删除、移动、重命名文件，还有很多不同之处包括
+读/写数据流等。
+
+从物理存储中读取数据的速度受限于磁盘I/O的上限，同时大量数据的网络传输也会消耗大量时间，因此
+想要实现高效的大数据存储和读取，需要将数据经可能地存储在多个节点中，并且我们希望每个节点
+的数据处理都可以在节点上完成。这样可以尽量减少数据的传输量，提高处理效率。HDFS基于一次写入、多
+次读取的思路构建，这样可以保证高效的访问，同时HDFS以流式数据访问模式来存储超大文件，这里的
+超大文件指具有几百MB 、几百GB 甚至几百TB
+大小的文件，流式数据访问是指我们每次分析数据都将
+涉及到数据集的大部分甚至全部，因此读取整个数据集的时间延迟比读取第一条记录的时间延迟更
+重要。Hadoop
+不需要运行在价格昂贵可靠的机器上，它可以运行在普通的商用硬件集群上。这样
+做的好处是花费较少，但是故障率较高。但是HDFS
+遇到上述故障时，被设计成能够持续运行且不让
+用户察觉到明显的中断。这也是Hadoop 的优势之一。
+
+HDFS可用来处理PB
+级的数据，它的组成包括NameNode和DataNode，这是HDFS的核心。其中NameNode
+只有一个，主要用于管理存储数据的元数据，而DataNode
+可以有多个，主要是用来直接存储数据。 在DataNode
+存储数据块时，会默认根据一定的规则在机器的不同DataNode
+中存储3份，以防止数据发生 损坏而造成不可挽回的损失。
+
+HDFS
+有很多优良的特性，比如它是一个高容错的系统，可以部署在一般的普通机器上，它的高容错率防
+止数据出问题，即使一个普通节点上的数据出现问题，它也能很好地处理。Hadoop
+的文件模型是一次写 入，多次读取，一旦HDFS
+上的文件被创建并写入了内容，关闭后不需要再对它进行更改（但支持文件追
+加），此方法也大大提高了HDFS处理文件的吞吐量。
+
+对于一些应用尽管数据量大，但是并不适合运行在HDFS
+上，包括要求低时间延迟的数据访问，对于这样
+的数据要求在几十毫秒内访问数据，HDFS
+还没达到这一要求。其次是HDFS不适合处理大量的小文件，引 文NameNode
+将文件系统的元数据存储在内存中，因此该文件系统所能存储的文件总数受制于
+NameNode
+的内存容量。最后，HDFS不适合处理多用户写入，任意修改的文件。HDFS
+中的文件可能只有一个写入 者
+，而且写操作总是将数据添加在稳健的末尾。因此它不支持具有多个写入者的操作，也不支持在文件
+的任意位置进行修改。
+
+### HDFS 的体系结构
+
+大家都知道我们的计算机磁盘都有容量，这里面也会分出很多的数据块(DATA
+BLOCK)，每个数据块有默
+认的大小，数据块是磁盘进行读/写的最小单位，多个数据块组成文件系统块。文件系统块一般为几千
+字节，而磁盘块一般512字节。但是系统自身也提供了一些工具（如 df 和 fsck
+）来维护文件系统，它 们直接对文件中的块进行操作。
+
+在HDFS文件系统中，每个数据文件也被分成多个数据块(Chunk)，来作为独立的存储单元。
+HDFS默认的数据块大小是64MB，也可以设置成32MB或128MB。一个大的文件会被分为多个数据块来存储，而对于小于块大小
+的文件则不会占据整个块的空间。为什么HDFS上的块设置的这么大，可以参见（Hadoop
+权威指南 第二版 p43）。
+
+对于分布式文件系统中块进行抽象能带来很多好处。比如，一个文件的大小可以大于网络中任意一个磁
+盘的容量。这样对于一些较大的文件，就不必存储一个磁盘上，可以充分利用集群上的磁盘空间。同时
+可以仅存储一个文件，该文件的块占满集群中所有的磁盘。其次是，使用块而非整个文件作为存储单元，
+大大简化了存储子系统的设计。这样可以简化存储管理同时消除了对元数据的顾虑。块还非常适合适用
+于数据备份进而提供数据容错能力和可用性。HDFS 默认将块复制到3
+个不同的机器上，这样保证了当其
+中一个发生错误或故障时，其他的相同的数据仍可运行。
+
+对于文件系统的管理，HDFS采用master/slave 架构。HDFS
+的体系结构有两类节点，一类
+是NameNode（master），一类是DataNode(slave)。NameNode
+只有一个，主要承担管理者的角色，它负
+责管理文件系统的命名空间（Namespace）以及客户端对文件的访问。NameNode
+执行文件系统的名字空
+间的操作如打开、关闭、重命名文件或目录。它也负责确定数据块到具体DataNode
+节点的映射，记录着
+每个文件中各个块所在数据节点的信息，类似于一个目录的作用，但是它不能永久保存块的信息，因为这些信息会在系统重建时
+由数据节点重建。
+
+DataNode 有多个,它是文件系统的工作节点，它在HDFS中真正存储了数据。HDFS
+展示了文件系统的命名空间，用户能够以文件的形式
+在上面存储数据。在系统内部，一个文件被分成一个或多个数据块，这些数据块存在一
+组DataNode 上。NameNode 和DataNode
+的交互是通过客户端（client）的用户来访问整个文件系统。客
+户端提供了一种类似于POSIX(可移植操作系统界面)的文件系统接口，以便用户在不清
+楚NameNode 和DataNode
+运行机制的情况下也能实现他们的功能。DataNode根据需要存储并检索数据块
+（受客户端或NameNode调度），并且定期向NameNode
+发送它们所存储的块的列表。也即是说，没 有NameNode
+,文件系统将无法使用。因为一旦运NameNode
+服务的机器毁坏，文件系统上的所有文件将会
+丢失，因为我们不知道如何根据DataNode 的块来重建文件。
+
+Hadoop 提供了两种对NameNode
+的容错机制。第一种是备份那些组成文件系统元数据持久状态的文 件。Hadoop
+通过配置使NameNode
+在多个文件系统上保存元数据的持久状态。这些写操作时实时同步的。
+第二种配置是运行一个辅助的NameNode
+,但它不能被用作NameNode。它的作用是定期通过编辑日志合并
+命名空间镜像，以防止编辑日志过大。
+
+### HDFS 基本文件系统操作
+
+首先，我们先来了解下HDFS的命令行接口。附录上我们介绍了伪分布式下Hadoop
+的说明和集群的说明，
+此外读者也可参考[@lam2010hadoop]、@holmes2012hadoop、@borthakur2008hdfs
+等。
+
+在我们设置伪分布式时，有两个属性需要解释。第一项是`fs.default.name` 设置
+为：`hdfs://localhost/` ,主要用于设置Hadoop 的默认文件系统。文件系统是由
+URI指定的， 这里我们使用了HDFS URI 来配置HDFS 为Hadoop
+的默认文件系统。HDFS 的守护程序将通过该属性项来 确定HDFS的NameNode
+的主机及接口。默认情况下是在localhost 默认端口8020 下运行NameNode。第二
+个属性是`dfs.replication` , HDFS
+默认设置将文件系统块复本设为3，如果我们改为1，在单
+独一个DataNode运行时，HDFS将无法将块复制到其他DataNode
+上，因此它会持续给出块副本不足的警 告。
+
+HDFS
+的文件系统操作包括：读取文件、创建目录、移动文件、删除数据、列出目录等。可以输
+入：
+
+        $ hadoop fs –help
+
+命令获取所有命令的详细帮助文件。
+
+如果将本地文件test.txt（在 `/home/dmc/input/` 路径下）上传
+到HDFS的`/user/dmc/`路径下，相应的命令行是：
+
+        $ hadoop fs –copyFromLocal /home/dmc/input/test.txt \
+           hdfs://localhost/user/dmc/test.txt
+
+因为在我们的`core-site.xml` 中已经设置了URI的默认设置
+（`hdfs://localhost/`），因此上述命令可以简写为：
+
+        $ hadoop fs –copyFromLocal /home/dmc/input/test.txt \
+           /user/dmc/test.txt
+
+我们也可以使用相对路径，并将文件复制到HDFS 的`home` 目录中，本例为：
+
+        $ hadoop fs –copyFromLocal /home/dmc/input/test.txt test.txt
+
+我们可以把文件复制回本地，并检查两个文件是否还一致：
+
+        $ hadoop fs –copyToLocal test.txt test.copy.txt
+
+这样HDFS 上的test.txt 文件就被复制到本地当前路径下命名为：test.copy.txt
+检验和当前路径下的是否一致：
+
+        $ md5sum test.txt test.copy.txt
+
+出现如下结果：
+
+        d41d8cd98f00b204e9800998ecf8427e  test.txt
+        d41d8cd98f00b204e9800998ecf8427e  test.copy.txt
+
+这里MD5键值相同，表明这个文件在HDFS 中保存完整。
+
+下面我们在HDFS 中创建目录并在列表中进行显示：
+
+        $ hadoop fs –mkdir test
+        $ hadoop fs –ls
+
+        Found 4 items
+        drwxr-xr-x   - dmc supergroup          0 2015-07-30 23:50 input
+        drwxr-xr-x   - dmc supergroup          0 2015-07-30 23:53 output
+        drwxr-xr-x   - dmc supergroup          0 2015-08-30 09:54 test
+        -rw-r--r--   1 dmc supergroup          0 2015-08-30 09:42 test.txt
+
+从这里可以看出返回的信息和我们在Linux
+系统中看到的有些类似，仅有细微的差别就是在第二列 中test.txt 文件中的数字
+1，这里的意思是在HDFS 文件系统中 test.txt 的副本只有一份。而在我们
+新建的目录 test
+中，由于我们还没有在里面存放东西，所以看到的只有空值，只是将目录作为元数据
+放在了NameNode中，而非DataNode 中。
+
+### 接口
+
+Hadoop 是用Java 写的，通过Java API 可以调用所有Hadoop
+文件系统的交互操作。
+
+让我们先来了解一下Hadoop
+的文件系统（见表[\[tab:hadoop-fs\]](#tab:hadoop-fs){reference-type="ref"
+reference="tab:hadoop-fs"}），正如前面所说Hadoop 是一个综
+合性抽象的文件系统概念。Java 抽象类
+`org.apache.hadoop.fs.FileSystem`定义 了Hadoop
+的一个文件系统接口，并且该抽象类有几个具体实现。
+
+  文件系统       URI 方案   Java 实现（org.apache.org）      定义
+  -------------- ---------- -------------------------------- ----------------------------------------------------------
+  Local          File       fs.LocalFileSystem               支持客户端校验和本地的文件系统
+  HDFS           hdfs       hdfs.DistributedFileSystem       Hadoop 的分布式文件系统
+  HFTP           hftp       hdfs.HftpFileSystem              支持HTTP方式以只读的方式访问HDFS，通常与 distcp 结合使用
+  HSFTP          hsftp      hdfs.hsftpFileSystem             在HTTPS 上提供对HDFS 只读访问的文件系统
+  HAR            har        fs.HarFileSystem                 一个构建在其他系统之上的用于文件存档的文件 系统
+  KFS            kfs        fs.kfs.kosmosFileSystem          Cloudstore 文件系统是类似于HDFS 和谷歌GFS 文件系统
+  FTP            ftp        fs.ftp.FTPFileSystem             由FTP 服务器支持的文件系统
+  S3（原生）     s3n        fs.s3native.NativeS3FileSystem   由 Amazon S3 支持的文件系统
+  S3（基于块）   s3         fs.s3.NativeS3FileSystem         基于Amazon S3 的文件系统
+
+  : Hadoop[]{label="tab:hadoop-fs"}
+
+如果想查看Hadoop 的文件系统可以使用命令：
+
+        $ hadoop fs –ls file://
+
+HDFS 的接口主要有Thrift 、C语言、FUSE WebDAV、HTTP、FTP 和Java 接口。
+
+### Hadoop 存档
+
+前面已经介绍过，Hadoop 存储文档的块默认为64 MB
+,如果文档没有这么大，如只有10MB ，也会耗费 一个块。Hadoop 存档工具或HAR
+文件，是一个高效的文件存档工具，它将文件存到HDFS块，在减 少NameNode
+使用的同时，还能允许对文件进行透明的访问。也就是说，Hadoop的存档文件可以作
+为MapReduce 的输入。
+
+Hadoop 存档是通过 archive
+工具根据一组文件创建而来。该存档工具运行一个MapReduce 作业来并行
+处理所有的输入文件，因此需要一个MapReduce
+集群来运行和使用它。我们使用HDFS 中的一些文档进行 存档：
+
+        $ hadoop fs –lsr ./myfiles/a
+        drwxr-xr-x  - dmc supergroup      0 2015-08-30 12:09 myfiles/a/aa
+        drwxr-xr-x  - dmc supergroup      0 2015-08-30 12:09 myfiles/a/bb
+        drwxr-xr-x  - dmc supergroup      0 2015-08-30 12:09 myfiles/a/cc
+
+运行archive 命令：
+
+        $ hadoop archive –archiveName myfiles.har ./myfiles/a  \
+           /myfiles
+
+删除文件：
+
+        $ hadoop fs - rmr  /myfiles/files.har
+
+不足之处就是创建一个har文件就会在原始文件的基础上，创建一个原始文件的副本，要消耗至少和文件
+容量大小的磁盘空间。虽然存档文件中源文件能被压缩，但是不支持压缩文件压缩。并且一旦创建，
+文件不能被修改，若想修改文件必须重新创立文档文件。
+
+### 访问HDFS
+
+HDFS通过URI（Uniform Resource Identifier,
+URI）对数据资源进行标识。URI的标准格式为格式为Scheme://Authority/Path。
+其中Scheme即为HDFS，Authority为HDFS中NameNode的主机名，Path则是文件或目录的路径。在标准伪分布式的HDFS下，
+想要通过绝对路径访问HDFS，需要配置core-site.xml的如下：
+
+\<property\> \<name\>fs.defaultFS\</name\>
+\<value\>hdfs://localhost:9000\</value\> \</property\>
+
+此外，也可以通过\"hdfs://localhost:9000/user/hadoop的方式访问hdfs，其中\$USER是用户的登录名，
+此时，需要配置hdfs-site.xml如下：
+
+\<property\> \<name\>dfs.namenode.rpc-address\</name\>
+\<value\>hdfs://localhost:9000\</value\> \</property\>
+
+进一步，也可以通过设定\"dfs.namenode.rpc-bind-host\"来使得外网可以访问HDFS，hdfs-site.xml配置
+如下：
+
+\<property\> \<name\>dfs.namenode.rpc-bind-host\</name\>
+\<value\>0.0.0.0\</value\> \</property\>
+
+其中的\<value\>会替换上面的\"dfs.namenode.rpc-address\"的取值，使得HDFS在外网可见。
+
+### 其他命令
+
+HDFS 还提供了一些常见的命令供我们处理文件：
+
+-   `NameNode -format` : 格式化DFS 文件系统
+
+-   `dfsadmin` :运行DFS 的管理客户端
+
+-   `NameNode` :运行DFS 的NameNode 进程
+
+-   `DataNode` :运行DFS 的DataNode 进程
+
+-   `secondNameNode` :运行DFS的 secondNameNode 进程
+
+-   `fsck` :运行HDFS 的检测进程
+
+-   `balancer` :运行一个文件系统平衡进 程
+
+-   `jobtracker` :运行一个JobTracker 进程
+
+-   `pipes `:运行一个Pipes 任务
+
+-   `tasktracker` :运行一 个TaskTracker任务
+
+-   `queue` :获得运行中的MapReduce 队列的信息
+
+这些命令的统一的格式是：
+
+        $ hadoop command [generations] [commandOperations]
+
+MapReduce 工作原理
+------------------
+
+想象当你是一个大厨，你带着你的厨子小弟们准备研发一种新型的辣椒酱。而这个辣椒酱的的配方是薄
+荷叶一撮，洋葱半个，番茄两个，辣椒十根，大蒜四根，切碎后加入适量的3勺盐和1升水，再放入混合
+研磨机里研磨。那么你准备怎么做才能最快呢？
+
+很简单，让一个小弟切薄荷，一个小弟切洋葱，一个小弟切番茄，一个小弟切辣椒，一个小弟切大蒜，
+或者为了让工作量尽可能的平均，可以让切薄荷的小弟一起把洋葱跟番茄切了，而让切洋葱跟切番茄的
+小弟一起加入切辣椒行列，这样每人的工作量都大概均匀了。然后等大家把原料都切好了后，再一起放
+进研磨机里。
+
+没错，其实这样的一个"分而治之"然后再汇总的工作框架正是MapReduce。聪明的读者一定马上就能理解
+了吧，其实大名鼎鼎的MapReduce并不是什么算法或者模型，它其实是一个分布式的计算框架，在这样的
+框架下我们可以进行任意我们想要做的事。是不是感觉棒棒哒。MapReduce的介绍还可参
+见[@miner2012mapreduce]、@gunarathne2015hadoop以及其中译本。
+
+### Map原理
+
+我们可以再看看刚刚的例子，在那个例子里其实我们总体上可以分做两步：第一步就是将原材料分成基
+本均匀的几份，然后分别让小弟们去切；而第二步则是将大家的工作量都汇总在一起，做下一步工作。
+而以上第一步就是Map。
+
+那么当我们在采用MapReduce进行分布式计算的时候，Map又是什么呢？
+
+当我们提交了一个任务后，比如我们提交了一个WordCount的Python脚本。往往这个脚本会分做两部分，一部
+分是用于Map，而另一部分则是用于Reduce。可以想象在上个例子中，你将制作辣椒酱的工序分做了两步：
+第一步就是将切碎原材料的事情分发出去，第二步就是进行合并然后进行研磨。同样，当你提了一个任
+务给MapReduce后，你得告诉它哪一步是Map，哪一步是Reduce。然后MapReduce就会将这个任务的分配分
+发给各个节点。
+
+在Map阶段，当每个结点都接收到具体的Mapper程序后。任务开始运行，每个节点会读取它那部分的数据。
+这些节点会按行把数据进行切分，然后以行为标准输入提供给可执行文件进程。在输出的时
+候，Mapper会把收到的每一行标准输出的内容转化成key/value对。为了方便后续的Reducer进行数据的
+交接，Mapper在输出的时候会根据key值进行排序。
+
+### Reduce原理
+
+当Map任务进行的同时，对应的Reducer也会从各个地方进行Mapper输出的"拉取"，其实这是一个复制的
+行为。然后Reducer会对从各个地方拉来的数据进行不断的merge。而merge的存储主要还是从内存到磁盘，
+也就是从Mapper那儿拉取的输出会先存储在内存中，当大于一定阈值后会将其写到磁盘，整个过程会直到Map端结束后才会结束。
+最终形成了Reducer的输入。最后会根据我们在一开始提交的Reduce，即可执
+行文件或脚本，对整个输入进行处理。
+
+### Partitioner和Combiner
+
+在Mapper处理完数据后，如何确定对应数据给到哪一个Reduce进行处理呢？在Map和Reduce中间往往还存在
+Partition和Combine的过程，Partitioner确定数据给到哪一个Reducer，Combiner则实现了在节点上先进行一次数据合并。
+显然Partitioner是必须的，否则会引起Reduce的混乱，而Combiner则是可选的，它在某些情况下可以提高MapReduce处理
+的效率
+
+#### Partitioner原理
+
+Partitioner的作用是对Map端输出的数据key作一个散列，使数据能够均匀分布在各个Reduce上进行后续操作，它可以确定将数据
+分给哪一个Reducer进行处理，因此它直接影响了Reduce端的负载均衡。HashPartitoner是MapReduce默认
+的Partitioner，用户也可以自定义自己的Partitioner。
+
+#### Combiner原理
+
+在MapReduce的实际计算中，每一个map都可能会产生大量的本地输出，Combiner的作用就是基点上的Map端的输出先做一次合并，
+以减少在map和reduce节点之间的数据传输量，提高数据传输效率。Combiner的输出是Reducer的输入，Combiner在节点上先
+基于key对value进行聚合，它没有默认的实现方式，需要用户在conf中指定。
+由于MapReduce计算的逻辑不同，并不是所有的MapReduce都需要Combiner，例如在求和、求最大值时使用
+则可以明显提高效率，但对求中位数等则不适用。
+
+### MapReduce 工作机制
+
+一个MapReduce程序起始于用户通过JobClient提交一个作业(Job)，然后该job的相关信息就会被发送到Job
+Tracker， Job
+Tracker是MapReduce框架的中心，他需要与集群中的机器进行定时通信，这是一个类似于心跳的机制,
+它管理哪些程序应该跑在哪些机器上，同时管理所有job失败、重启等操作。
+对应地在每台机器上也有监控该节点任务运行情况的Task Tracker，Task
+Tracker通过心跳机制和Job Tracker进行通信，
+JobTracker会搜集这些信息来对job进行监控和管理。 由于Job Tracker和Task
+Tracker模式的工作监控机制存在很多问题，在Hadoop0.23.0版本以后，采用了统一的
+资源管理器Hadoop
+Yarn，取而代之的是ResourceManager、AppliactionMaster和NodeManager，
+有兴趣的读者可以进一步学习。
+
+#### 任务提交
+
+MapReduce的作业（Job）是由JobClient提交给Hadoop集群的。一个Job包括了输入数据，MapReduce程序和
+配置信息。Hadoop将作业分为若干个任务（task）来执行，其中包括Map任务和Reduce任务。
+
+我们在作业提交之前，需要对作业进行一些相应的配置。首先，我们必须提交相应的Map程序、Reduce程序以及他们所依赖的程序，
+还需要设置作业的输入输出路径及其他配置（如map和reduce任务个数）。
+
+而我们的作业配置好后，是通过JobClinet来提交。当我们提交了一个MapReduce作业后，MapReduce程
+序会立马启动。而这个时候JobClient会向JobTracker请求一个新的JobId。同时检查作业输入和输出说
+明，比如输出文件是否已经存在。如果作业的输入有不满足要求的情况，则会立马终止作业并报错。
+
+而当检验作业的各项都符合规定后，JobClient会将运行的作业所需要的资源复制到一个以作业ID命名
+的文件下。而这个文件是在JobTracker的文件系统中。JobClient提交完成后，JobTracker会将作业加
+入队列，然后进行调度，默认的调度方法是先进先出的方式。为了创建任务运行列表，JobTracker从该
+共享文件系统中获取相应的信息，以计算输入分片信息，并针对每一个分片创建Map任务以及Reduce任
+务。
+
+#### 分配任务
+
+而任务的分配是通过TaskTracker和JobTracker之间的心跳机制完成的。在任务执行的过程
+中，TaskTracker会定期发送"心跳"给JobTracker，以用来告诉JobTracker它的状态，如是否还在运行
+或是否准备好进行新的任务。
+
+当TaskTracker没有执行任务的时候，JobTracker可以为之选择任务。而在为TaskTracker选择任
+务（task）之前，JobTracker首先要选定任务所在的作业（Job）。而根据TaskTacker的固定数量的任务槽，
+选择好作业之后JobTracker就可以作为该作业选定一个任务，分别为Map任务和Reduce任务。
+
+对于一个Map任务JobTracker会考虑TaskTracker的网络位置，会为之选取一个与其输入分片距离最近
+的TaskTracker。最理想的情况是任务运行在和输入分片在同一个机器上（数据本地化），次之是机架
+本地化。而在选择Reduce任务的时候，JobTracker简单的从待运行的Reduce任务列表中选取下一个来
+执行。
+
+#### 执行任务
+
+TaskTracker会通过共享文件系统把作业的相应文件，如代码、输入输出信息，复制到TaskTracker所在
+的文件系统，从而实现作业文件的本地化。同时，TaskTracker将应用程序所需要的全部文件从分布式
+缓存复制到本地磁盘。然后TaskTracker为任务新建一个本地工作目录，并把jar文件中的内容解压到这
+个文件夹下，然后TaskTracker新建一个TaskRunner实例来运行该任务。TaskRunner启动一个新的JVM来
+运行每个任务，以便用户自定义的Map和Reduce函数不会影响到TaskTracker。子进程通过接
+口与父进程通信。任务的子进程每隔几秒便告知父进程它的进度，直到任务完成。
+
+#### 完成任务
+
+当JobTracker收到作业的最后一个任务已完成的通知后，便把作业状态设置为"成功"。然后
+在JobClient查询状态时知道任务已经完成。于是JobClient打印一条消息告知用户，然后从RunJob方法
+返回。
+
+最后JobTracker清空作业的工作状态，指示TaskTracker也清空作业的工作状态。
+
+Map任务将结果写入本地硬盘，而非HDFS。因为Map任务的结果是中间结果，要给Reduce任务进行再次处
+理，处理完之后Map任务的结果就没有价值了，通常是被删掉。HDFS上的同一份数据，通常情况下是要备
+份的。如果存入HDFS，那么就有些小题大做了。
+
+#### MapReduce常用参数设置
+
+在了解了MapReduce的基本知识后，可以发现在执行MapReduce过程中，很多参数都不是唯一的，用户都可以根据实际
+情况来设定合适的参数，例如手动设定reduce为1，则可以将所有Map的输出都集中到一个Reduce进行处理。下面列举了一些
+常用的参数设置。
+
+        mapred.reduce.tasks（mapreduce.job.reduces）：
+        //默认启动的reduce数。通过该参数可以手动修改reduce的个数。默认值为1。
+
+        mapreduce.task.io.sort.factor：
+        //Reduce Task中合并小文件时，一次合并的文件数据，每次合并的时候选择最小的前10进行合并。默认值为10。
+
+        mapreduce.task.io.sort.mb：
+        //Map Task缓冲区所占内存大小。默认值为100。
+
+        mapred.min.split.size：
+        // mapper在拉取数据的时候split的最小值，默认为1B。
+
+        mapreduce.jobtracker.handler.count：
+        //JobTracker可以启动的线程数，一般为tasktracker节点的4%。默认值为10。
+
+        mapreduce.reduce.shuffle.parallelcopies：
+        //reuduce shuffle阶段并行传输数据的数量。默认值为5。
+
+        mapreduce.map.output.compress：
+        //map输出是否进行压缩，如果压缩就会多耗cpu，但是减少传输时间，如果不压缩，就需要较多的传输带宽。默认为False。
+        //配合 mapreduce.map.output.compress.codec使用，默认是 org.apache.hadoop.io.compress.DefaultCodec，可以根据需要设定数据压缩方式。
+
+        mapreduce.tasktracker.tasks.reduce.maximum：
+        //一个tasktracker并发执行的reduce数，建议为cpu核数，默认值为2。
+
+### Shuffle
+
+#### Map端的Shuffle
+
+Map端的Shuffle实际包含了输入(input)过程、切分(partition)过程、溢写（spill）过程（sort和combine过
+程）、merge过程。
+
+-   input过程。当我们在采用MapReduce进行分布式计算时，我们首先会将数据放在HDFS上，
+    而HDFS上的数据是以block为单位存储的。而map
+    task在拉取数据的时候，是按split为单位拉取
+    的。这里的Split不是真正的对数据文件进行切分，只是确定每一个Mapper应该读取多少数据量，一个数据文件
+    可能存储在多个block上，每个block上可能存在多个split，
+    即一个block可以被分为多个split，
+    这和mapreduce的具体设置相关，默认为一对一。
+
+-   partition过程。partition过程即前文提到的Partitioner组件实现的效果。Mapper的输出是
+    key/value 对，
+    如果选择默认的HashPartitioner，则会对key值进行hash并得到一个结果，该结果决定了当前的
+    Mapper的输出到底是交给哪个Reducer。 即对key值进行hash后再按reduce
+    task数量取模，并得到将该Mapper的输出交由哪个Reducer进行
+    处理。key/value对以及partition
+    的结果都会被写入缓冲区，减少磁盘I/O的影响。
+
+-   spill过程。当map
+    task输出结果过多大于一定阈值时，就可能发生内存溢出，即从内
+    存往磁盘写数据的过称为spill。当将缓冲区的数据临时写入磁盘后，就可以释放这部分内存，然后重
+    新利用这块缓冲区。而整个spill过程都是由另外单独线程来完成，并不影响往缓冲区写Map结果的线
+    程。在执行spill之前，Map会根据key值对每个输出进行排序，这样做是为了方便后续的Reduce过程。
+    而在我们进行Reduce之前，有些时候会先对数据进行一些整合，可以理解为一个mini-Reduce过程，称
+    为Combiner。即将有相同key的输出做一些预处理，比如相加或者求最大等。
+
+-   merge过程。每次溢写都会在磁盘上生成一个溢写文件，当map task
+    完成时，内存缓冲区中的全
+    部数据都溢写到磁盘中形成众多溢写文件。merge过程就是要将这些溢写文件归并到一起。
+
+#### Reduce端的Shuffle
+
+在 Map task 开始有输出后，Reduce task便会开始进行不断拉与自己对应的每个
+Map task的结果输出 并不断的进行 merge ，也最终形成一个文件作为 Reduce
+task 的输入文件。
+
+-   copy过程，简单拉取数据。Reduce
+    task进行数据拉取的过程其实就是复制的过程。
+
+-   merge过程，和Map端的merge类似。在Reduce task 将数据copy
+    过来后，会先放入内存缓冲区中，
+    与Map的内存方式相似，当大于一定阈值后，并从内存写入到磁盘。然后在磁盘中生成了众多的溢写文
+    件。这样的merge方式会一直在运行到Map端没有输出的数据时才结束，最终输入文件。
+
+-   reducer的输入文件。通过merge最后会生了输入文件，大多数情况下存在于磁盘中，但是需要将
+    其放入内存中。当reducer 输入文件已定，整个 Shuffle
+    阶段才算结束。然后就是 Reducer 执行， 把结果放到 HDFS 上。
+
+Hadoop上运行MapReduce
+---------------------
+
+### 通过Hadoop Streaming运行MapReduce
+
+Hadoop
+Streaming是一个基础的API，它可以通过任何一种语言按照MapReduce的方式
+去执行脚本文件。例如Mapper和Reducer脚本文件。它的原理类似于UNIX操作系统中的pipe管道操
+作。Mapper和Reducer以键值对通过标准输入流（stdin）和标准输出流（stdout）进行输入和输
+出，Reducer最后会将运行结果保存到HDFS中。Hadoop
+Streaming最大的一个优势是在于它允许以
+非Java语言编写MapReduce任务，这些任务能够与Java语言编写的任务一样在Hadoop集群中运
+行。Hadoop Streaming支持Perl、Python、R等多种语言。
+
+通过Hadoop
+Streaming，任何可执行文件都可以被指定为Mapper/Reducer。这些可执行文件不需要事先
+存放在集群上；如果不在worknodes里面，则需要用`-file`选项让framework把可执行文件作为
+作业的一部分，一起打包提交。但是要处理的文件必须要放到Hadoop的HDFS上。
+
+由于Hadoop是用Java开发的，在使用hadoop
+streming带来便利的同时，也存在一定的局限性，具体如下 1.
+只能通过stdin和stdout来进行输入输出，不像 Java
+的程序那样可以在代码里使用 API，控制力比较弱。 2.
+Streaming默认只能处理文本数据Textfile，对于二进制数据，比较好的方法是将二进制的key,
+value进行重编码，转化为文本。 3. 由于涉及转换过程，会带来更多的开销
+
+以下为一个简单的Python版本的MapReduce执行过程，在本书中，我们将多次使用Python和R作为运行
+MapReduce的程序。
+
+-   上传数据到HDFS
+
+        $ hadoop fs -put /home/dmc/TREASURE1.txt /
+
+-   执行MapReduce
+
+        $ hadoop jar /home/dmc/hadoop/share/hadoop/tools/lib/hadoop-streaming-2.5.2.jar \
+        -file /home/dmc/mapper.py /home/dmc/reducer.py \
+        -input /TREASURE1.txt \
+        -output WordsCount \
+        -mapper "/home/dmc/mapper.py" \
+        -reducer "/home/dmc/reducer.py" \
+
+### Hadoop Streaming的常用参数设置
+
+
+        -mapred.job.name: 设置作业名
+        -input：指定作业输入，可以是文件或者目录，可以使用*通配符，也可以使用多次指定多个文件或者目录作为输入
+        -output：指定作业输出目录，并且必须不存在，并且必须有创建该目录的权限，-output只能使用一次
+        -mapper：指定mapper可执行程序或Java类，必须指定且唯一
+        -reducer：指定reducer可执行程序或Java类
+        -file：将指定的本地/hdfs文件分发到各个Task的工作目录下
+        -jobconf mapred.reduce.tasks： 指定reducer的个数，如果设置为0或者-reducer NONE 则没有reducer程序，mapper的输出直接作为整个作业的输出
+        -jobconf mapred.map.tasks 设置map任务个
+
+### Hadoop其他MapReduce API
+
+虽然Hadoop是用Java语言写成的，但是MapReduce过程并不必须是用Java来写。除了以上介绍的Hadoop
+Streaming以外，还有支持C++语言的Hadoop
+Pipe的接口。这里不做过多介绍，感兴趣的读者可以参考
+Hadoop官方文档或者[@white2012hadoop]、@sammer2012hadoop。
