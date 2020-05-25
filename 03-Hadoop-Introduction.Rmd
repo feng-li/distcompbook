@@ -24,7 +24,7 @@ System）和 MapReduce(Google MapReduce
 
 ### Hadoop 的历史
 
-Hadoop 起源于2002年的Apache Nutch项目，是Apache Lucene创始人Doug
+Hadoop 起源于2002年的[Apache Nutch](https://nutch.apache.org/)项目，是Apache Lucene创始人Doug
 Cutting创建
 的，他对Hadoop这一名称的来历这样解释："这个名字是我的孩子给一头吃饱了的棕黄色大象起的。我的
 命名标准是简短，容易发音和拼写，没有太多的含义，并且不会被用于别处。"因此，我们现在看
