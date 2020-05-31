@@ -503,7 +503,10 @@ HDFS内进行的删除工作并不是真正的删除，而是在HDFS内开辟出
           hadoop fs -cat /user/student/output/*
 
 
+### Hadoop过时了吗？
 
-
+不，Hadoop并没有过时， Hadoop生态系统仍然无法替代。 HDFS仍然是世界上最可靠的存储系统，并且全球超过50％的数据已移至Hadoop。
+我们要知道的是，尽管有很多其他的工具可以用来解决非常特殊的大数据问题，但是Hadoop已经发展成为一个完整的生态系统，它可以提供相关大数据问题的所有解决方案。因此，虽然现在Hadoop的某些组件已被新组件取代，而且很少有公司再去使用那些旧的组件，但是Hadoop仍然没有过时。例如，Hadoop Mapreduce正逐渐被Apache Spark取代，但Spark仍使用Hadoop HDFS和Yarn进行存储和资源管理，而且许多公司仍在使用MapReduce。
+简而言之，无论有什么新技术出现，我们还是应该学习Hadoop，Hadoop将会成为新技术的基础，学习Hadoop对我们没有坏处。
 
 
