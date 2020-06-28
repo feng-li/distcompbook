@@ -1,0 +1,272 @@
+# Text Processing with Spark
+# 使用Spark进行文本处理
+
+## 文本处理中的概念
+
+### 语料库(Corpora)
+
+语料库是大量文本的集合。它是进行语言分析所依赖的的书面或口头材料。
+语料库可以由书面语言，口头语言或两者共同组成。口语语料通常是录音形式。语料库可以是开放的也可以是封闭的。开放语料库是不声称包含特定区域的所有数据的，而封闭语料库则是声称包含特定字段的所有或几乎所有数据的。例如，历史语料库将关闭，因为无法再向该区域输入任何内容。
+语料库为语法学家，词典编纂者和其他有关方面提供了更好的语言描述。计算机可处理的语料库允许语言学家采用全局计算的原则，允许检索特定单词或结构的所有出现情况以进行检查或随机选择样本。
+语料库分析提供词法信息，句法信息，语义信息和语用信息。语言信息由一致性和频率计数提供。一致性是语料库中特定特征或特征组合的列表。每个一致性列表都会显示一定数量的上下文，以及前后的文本，最常用的一致性类型是KWIC，它代表上下文中的关键字。
+语料库被用于NLP工具的开发。应用包括拼写检查，语法检查，语音识别，文本到语音和语音到文本合成，自动抽象和索引编制，信息检索和机器翻译。 语料库还用于为学习者创建新的词典和语法。
+
+### Tokens
+
+Token是“符号”的高级表达。一般指具有某种意义，无法再分拆的符号。在英文自然语言处理中，Tokens 通常是单独的词。因此，Tokenization就是将每个句子分拆成一系列词。通常情况下，最简单的方法是使用`split()`方法返回词列表。这里默认情况下是将一段话在空格字符处分拆，除了空格，也包其他标签、新行等。这种方法还很智能，可以忽略一个序列中的两个或多个空格字符。因此不会返回空字符串。 文本的词汇表只是它使用的Tokens 的集合，在一个集合中，所有重复项都会折叠在一起。在Python中，我们可以使用`set()`命令获取词汇表项。
+
+### 停用词(Stopwords)
+
+停用词是常见的词，至少在信息检索和自然语言处理方面，它们通常不会对句子的含义有所帮助。
+这些是诸如“the”和“a”的词，大多数搜索引擎会从搜索查询和文档中过滤掉停用词，以节省索引中的空间。
+
+### 词干法(Stemming)
+
+词干法是从单词中删除词缀的技术，以词干结尾。例如，cooking的主干是cook，一个好的词干算法知道可以删除ing后缀。
+搜索引擎最常使用词干索引词。搜索引擎能存储词干，而不是存储所有形式的单词，从而大大减少了索引的大小，同时提高了检索的准确性。
+
+### 词频计数(Frequency Counts)
+
+词频计数计算某个特征的点击次数。词频计数需要找到语料库中某个特定特征的所有出现。因此，它在协调中是隐含的，这是软件的使用目的。词频计数可以用统计方法解释。
+
+### 分词器(Word Segmenter)
+
+分词是将一串书面语言分成其组成词的处理方法。
+在英语和其他使用某种形式的拉丁字母语言中，空格能够很好地被用作近似于单词分隔符(word delimiter)。但是在某些情况下，仅空格字符可能不够用于进行分词操作，比如将can not 缩写为can't 的缩写的情况。
+但是，在某些语言中，找不到与空格一样的可以直接对句子进行分隔的单词分隔符，在这些语言中进行分词是一个困难的操作。没有简单的单词分隔符的语言包括中文，日语（在其中句子被分隔而不是单词被分隔），泰语和老挝语（在其中短语和句子被分隔但没有单词被分隔）以及越南语（在其中音节被分隔而不是单词之间被分隔）。
+
+### 词性标注(Part-Of-Speech Tagger)
+
+在语料库语言学中，词性标记（POS标记或POST），也称为语法标记或单词类别歧义消除，是将文本（语料库）中的单词标记为与特定词性相对应的过程， 根据其定义和上下文（即其与短语，句子或段落中相邻单词和相关单词的关系）而定。
+通常将这种简化形式教给学龄儿童，将单词识别为名词，动词 ，形容词，副词等。
+
+### 命名实体识别(Named Entity Recognizer)
+
+命名实体识别（NER），是一个标准的自然语言处理问题，也是信息提取的子任务。 其主要目的是将文本中的命名实体定位并分类为预定义的类别，例如人员名称，组织，位置，事件，时间表达，数量，货币价值，百分比等。
+简而言之，NER负责从文本中提取真实世界的实体，例如个人，组织或事件。 
+命名的实体识别也简称为实体标识，实体组块和实体提取。 它们与POS（词性）标签非常相似。
+NER是自然语言处理实用化的重要内容，在信息提取、句法分析、机器翻译等应用领域中具有重要的基础性作用。
+
+## 处理方法
+
+### 特征提取
+
+#### TF-IDF
+
+Term frequency-inverse document frequency (TF-IDF)是一种特征向量化方法，广泛用于文本挖掘中，以反映文档中的词对语料库中文档的重要性。用$t$表示词，用$d$表示文档，用$D$表示语料库。词频率$TF(t,d)$是某词语$t$在文档$d$中出现的次数，而文档频率$DF(t,D)$是包含词$t$的文档的数量。
+词频率TF能使我们实现对文档所传达的信息的把握，但如果我们仅使用词频率来衡量某词在文档中的重要性，则很容易过分强调那些经常出现但几乎没有有关文档信息的词，例如“一个”，“这个”和“的”等等。如果某词经常出现在整个语料库中，则表示该词不包含有关特定文档的特殊信息。逆文档频率(IDF)是一个词提供多少信息的数字度量：
+$$IDF(t,D)=\log\frac{|D|+1}{DF(t,D)+1}$$
+$|D|$是语料库中文档的总数。由于使用对数，因此如果一个词出现在所有文档中，则其IDF值将变为0，即认为该词不包含有关特定文档的特殊信息。
+TF-IDF度量是TF和IDF的乘积：
+$$TFIDF(t,d,D)=TF(t,d) \cdot IDF(t,D)$$
+
+词频率和文档频率的定义有几种变体。在MLlib中，我们将TF和IDF分开以使其具有灵活性。
+
+##### TF
+
+HashingTF和CountVectorizer均可用于生成词频率向量。
+HashingTF是一个Transformer，它接受多个词集并将这些词集转换为固定长度的特征向量。在文本处理中，“一组词”可能就是一袋单词。 HashingTF利用了hashing技巧。通过应用hashing函数将原始特征映射到索引（项）。这里使用的hashing函数是MurmurHash3。然后根据映射的索引计算词频。这种方法避免了全局性的由词到索引的计算，这种计算对于大型语料库可能是非常昂贵的。但是它可能会造成潜在的混乱，即hashing处理后不同的原始特征可能成为同一项。为了减少可能造成的混乱，可以增加目标要素的维数，比如增加hashing表的 buckets数量。由于使用散列值的简单模来确定向量索引，因此建议使用2的幂作为特征维，否则特征将不会均匀地映射到向量索引。默认特征尺寸为$2^{18}=262144$。可选的二进制切换参数控制词频计数，当设置为true时，所有非零频率计数都设置为1，这对于模拟二进制而不是整数计数的离散概率模型特别有用。
+进行hashing计算时需要用到`pyspark.ml.feature`中的`HashingTF`,该模块的默认设置为：
+
+     pyspark.ml.feature.HashingTF(numFeatures=262144, binary=False, inputCol=None, outputCol=None)
+
+CountVectorizer将文本文档转换为词计数向量。有关更多详细信息，请参考CountVectorizer。
+
+##### IDF
+IDF是拟合数据集并生成IDFModel的Estimator。 IDFModel采用特征向量（通常通过HashingTF或CountVectorizer创建）并缩放每个特征。直观来讲，它会减少在语料库中经常出现的词的权重。
+进行IDF计算时需要用到`pyspark.ml.feature`中的`IDF`,该模块的默认设置为：
+
+     pyspark.ml.feature.IDF(minDocFreq=0, inputCol=None, outputCol=None)
+
+类似于其他Estimator，在使用可选参数对输入数据集进行模型拟合时，可使用函数`fit`。
+要注意的是，`spark.ml`不提供用于文本分割的工具，可使用`Stanford NLP Group`和`scalanlp/chalk`进行有关操作。
+
+##### 实例
+
+在下面的代码段中，从一组句子开始。我们使用Tokenizer将每个句子分成单词。对于每个句子（单词袋），使用HashingTF将句子Hashing为特征向量。然后使用IDF重新缩放特征向量，在对文本数据进行处理时，这种处理通常可以提高性能。处理完毕的特征向量可以传递给学习算法进行进一步分析。
+
+     from pyspark.ml.feature import HashingTF, IDF, Tokenizer
+
+     sentenceData = spark.createDataFrame([
+         (0.0, "Hi I heard about Spark"),
+         (0.0, "I wish Java could use case classes"),
+         (1.0, "Logistic regression models are neat")
+     ], ["label", "sentence"])
+
+
+     tokenizer = Tokenizer(inputCol="sentence", outputCol="words")
+     wordsData = tokenizer.transform(sentenceData)
+
+     hashingTF = HashingTF(inputCol="words", outputCol="rawFeatures", numFeatures=20)
+     featurizedData = hashingTF.transform(wordsData)
+     # alternatively, CountVectorizer can also be used to get term frequency vectors
+
+     idf = IDF(inputCol="rawFeatures", outputCol="features")
+     idfModel = idf.fit(featurizedData)
+     rescaledData = idfModel.transform(featurizedData)
+
+     rescaledData.select("label", "features").show()
+
+#### Word2Vec
+
+Word2Vec是一个Estimator，它采用代表文档的单词序列并训练Word2VecModel。该模型将每个单词映射到唯一的固定大小的向量。 Word2Vec计算单词的分布式矢量表示。分布式表示的主要优点是在向量空间中相似的词很接近，这使得对异模式的泛化更加容易，并且模型估计更加可靠。分布式矢量表示被证明在许多自然语言处理应用程序中很有用，例如命名实体识别，歧义消除，解析，标记和机器翻译。有关更多详细信息，请参阅MLlib用户指南中的Word2Vec。
+
+进行Word2Vec计算时需要用到`pyspark.ml.feature`中的`Word2Vec`,该模块的默认设置为：
+
+     pyspark.ml.feature.Word2Vec(vectorSize=100, minCount=5, numPartitions=1, stepSize=0.025, maxIter=1, seed=None, inputCol=None, outputCol=None, windowSize=5, maxSentenceLength=1000)
+
+类似于其他Estimator，在使用可选参数对输入数据集进行模型拟合时，可使用函数`fit`。
+
+在下面的代码段中，从一组文档开始，每个文档都由单词序列表示。对于每个文档，使用Word2Vec将其转换为特征向量。然后可以将该特征向量传递给学习算法进行进一步计算。
+
+     from pyspark.ml.feature import Word2Vec
+
+     # Input data: Each row is a bag of words from a sentence or document.
+     documentDF = spark.createDataFrame([
+         ("Hi I heard about Spark".split(" "), ),
+         ("I wish Java could use case classes".split(" "), ),
+         ("Logistic regression models are neat".split(" "), )
+     ], ["text"])
+
+
+     # Learn a mapping from words to Vectors.
+     word2Vec = Word2Vec(vectorSize=3, minCount=0, inputCol="text",      outputCol="result")
+     model = word2Vec.fit(documentDF)
+
+     result = model.transform(documentDF)
+     for row in result.collect():
+         text, vector = row
+         print("Text: [%s] => \nVector: %s\n" % (", ".join(text), str(vector)))
+
+
+### 特征转换
+
+#### Tokenizer分词器
+
+标记化是获取文本（例如句子）并将其分解为单个词（通常是单词）的过程。一个简单的`Tokenizer`模块提供了此功能。Tokenizer将输入字符串转换为小写字母，然后使用空格将字符串分解为单词。
+进行Tokenizer计算时需要用到`pyspark.ml.feature`中的`Tokenizer`,该模块的默认设置为：
+
+     pyspark.ml.feature.Tokenizer(inputCol=None, outputCol=None)
+
+RegexTokenizer是基于正则表达式的 Tokenizer，可以通过使用提供的正则表达式模式（以Java语言）来拆分文本（默认值）或重复匹配正则表达式（如果gaps为false）来提取tokens。可选参数还允许使用最小长度过滤tokens。它返回一个可以为空的字符串数组。
+进行RegexTokenizer计算时需要用到`pyspark.ml.feature`中的`RegexTokenizer`,该模块的默认设置为：
+
+     yspark.ml.feature.RegexTokenizer(minTokenLength=1, gaps=True, pattern='\s+', inputCol=None, outputCol=None, toLowercase=True)
+
+使用Tokenizer和RegexTokenizer进行处理的实例如下：
+     
+     from pyspark.ml.feature import Tokenizer, RegexTokenizer
+     from pyspark.sql.functions import col, udf
+     from pyspark.sql.types import IntegerType
+
+     sentenceDataFrame = spark.createDataFrame([
+         (0, "Hi I heard about Spark"),
+         (1, "I wish Java could use case classes"),
+         (2, "Logistic,regression,models,are,neat")
+     ], ["id", "sentence"])
+
+     tokenizer = Tokenizer(inputCol="sentence", outputCol="words")
+
+     regexTokenizer = RegexTokenizer(inputCol="sentence", outputCol="words",      pattern="\\W")
+     # alternatively, pattern="\\w+", gaps(False)
+
+     countTokens = udf(lambda words: len(words), IntegerType())
+
+     tokenized = tokenizer.transform(sentenceDataFrame)
+     tokenized.select("sentence", "words")\
+         .withColumn("tokens", countTokens(col("words"))).show(truncate=False)
+
+     regexTokenized = regexTokenizer.transform(sentenceDataFrame)
+     regexTokenized.select("sentence", "words") \
+         .withColumn("tokens", countTokens(col("words"))).show(truncate=False)
+
+
+#### StopWordsRemover删除停用词
+
+停用词是应从输入文本中排除的词，通常是因为这些词频繁出现且含义不大。
+StopWordsRemover将一个字符串序列（例如Tokenizer的输出）作为输入，并从输入序列中删除所有停用词。停用词列表由stopWords参数指定。
+可以通过调用`StopWordsRemover.loadDefaultStopWords(language)`访问某些语言的默认停用词，其可用选项为“丹麦语”，“荷兰语”，“英语”，“芬兰语”，“法语”，“德语”，“匈牙利语”，“意大利语”，“挪威语”，“葡萄牙语”，“俄语”，“西班牙语”，“瑞典语”和“土耳其语”。布尔参数`caseSensitive`指示匹配是否区分大小写（默认情况下为false）。
+从Spark3.0.0开始，StopWordsRemover可以通过设置`inputCols`参数一次过滤掉多列。请注意，同时设置了`inputCol`和`inputCols`参数时，将引发冲突。
+
+进行StopWordsRemover计算时需要用到`pyspark.ml.feature`中的`StopWordsRemover`,该模块的默认设置为：
+
+     pyspark.ml.feature.StopWordsRemover(inputCol=None, outputCol=None, stopWords=None, caseSensitive=False, locale=None, inputCols=None, outputCols=None)
+
+使用StopWordsRemover进行删除停用词处理的实例如下：
+
+     from pyspark.ml.feature import StopWordsRemover
+
+     sentenceData = spark.createDataFrame([
+         (0, ["I", "saw", "the", "red", "balloon"]),
+         (1, ["Mary", "had", "a", "little", "lamb"])
+     ], ["id", "raw"])
+
+     remover = StopWordsRemover(inputCol="raw", outputCol="filtered")
+     remover.transform(sentenceData).show(truncate=False)
+
+#### n-gram
+
+n-gram是某个整数n的n个tokens（通常是单词）的序列。 NGram类可用于将输入要素转换为n-gram。
+NGram将字符串序列作为输入（例如Tokenizer的输出），输入数组中的空值将被忽略。
+参数n用于确定每个n-gram中的项数。
+输出将由一系列n-gram组成，其中每个n-gram由n个连续单词的以空格分隔的字符串表示。 如果输入为空时，将返回一个空数；如果输入序列包含少于n个字符串，则不会产生输出。
+
+进行n-gram计算时需要用到`pyspark.ml.feature`中的`NGram`,该模块的默认设置为：
+
+     pyspark.ml.feature.NGram(n=2, inputCol=None, outputCol=None)
+
+使用NGram进行处理的实例如下：
+
+     from pyspark.ml.feature import NGram
+
+     wordDataFrame = spark.createDataFrame([
+         (0, ["Hi", "I", "heard", "about", "Spark"]),
+         (1, ["I", "wish", "Java", "could", "use", "case", "classes"]),
+         (2, ["Logistic", "regression", "models", "are", "neat"])
+     ], ["id", "words"])
+
+     ngram = NGram(n=2, inputCol="words", outputCol="ngrams")
+
+     ngramDataFrame = ngram.transform(wordDataFrame)
+     ngramDataFrame.select("ngrams").show(truncate=False)
+
+
+### 使用LDA进行主题建模
+
+Latent Dirichlet Allocation (LDA)是支持`EMLDAOptimizer`和`OnlineLDAOptimizer`的Estimator，并生成LDAModel作为基础模型。如果需要，用户可以将`EMLDAOptimizer`生成的LDAModel强制转换为DistributedLDAModel。
+LDA是一种为文本文档设计的主题模型，它是一种无监督的方法，基于Dirichlet分布对文档和主题进行建模。其中，每个文档都被认为是各个主题的分布，而每个主题都被认为是单词的分布。因此，给定文档集合，LDA输出一组主题，每个主题与一组单词相关联。
+为了对分布进行建模，LDA还需要主题数（通常用k表示）作为输入。 例如，以下是从加拿大用户的随机tweet集中提取的主题，其中k = 3：
+主题1：美好，白天，快乐，周末，今晚，积极的经历
+主题2：美食，美酒，啤酒，午餐，美味，就餐
+主题3：房屋，房地产，房屋，小费，抵押，房地产
+
+进行LDA计算时需要用到`pyspark.ml.clustering`中的`LDA`,该模块的默认设置为：
+
+      pyspark.ml.clustering.LDA(featuresCol='features', maxIter=20, seed=None, checkpointInterval=10, k=10, optimizer='online', learningOffset=1024.0, learningDecay=0.51, subsamplingRate=0.05, optimizeDocConcentration=True, docConcentration=None, topicConcentration=None, topicDistributionCol='topicDistribution', keepLastCheckpoint=True)
+
+使用LDA进行相关建模处理的实例如下：
+
+     from pyspark.ml.clustering import LDA
+
+     # Loads data.
+     dataset = spark.read.format("libsvm").load("data/mllib/sample_lda_libsvm_data.txt")
+     dataset.head(10)
+
+     # Trains a LDA model.
+     lda = LDA(k=10, maxIter=10)
+     model = lda.fit(dataset)
+
+     ll = model.logLikelihood(dataset)
+     lp = model.logPerplexity(dataset)
+     print("The lower bound on the log likelihood of the entire corpus: " + str(ll))
+     print("The upper bound on perplexity: " + str(lp))
+
+     # Describe topics.
+     topics = model.describeTopics(3)
+     print("The topics described by their top-weighted terms:")
+     topics.show(truncate=False)
+
+     # Shows the result
+     transformed = model.transform(dataset)
+     transformed.show(truncate=False)
+
