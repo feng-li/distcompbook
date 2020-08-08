@@ -1,4 +1,5 @@
-## Hadoop Streaming
+# Hadoop Streaming
+
 Hadoop上运行MapReduce
 ---------------------
 
@@ -18,8 +19,8 @@ Streaming，任何可执行文件都可以被指定为Mapper/Reducer。这些可
 存放在集群上；如果不在worknodes里面，则需要用`-file`选项让framework把可执行文件作为
 作业的一部分，一起打包提交。但是要处理的文件必须要放到Hadoop的HDFS上。
 
-如果一个可执行文件被用于mapper，则在mapper初始化时， 每一个mapper任务会把这个可执行文件作为一个单独的进程启动。 mapper任务运行时，它把输入切分成行并把每一行提供给可执行文件进程的标准输入。 同时，mapper收集可执行文件进程标准输出的内容，并把收到的每一行内容转化成key/value对，作为mapper的输出。 如果一个可执行文件被用于reducer，每个reducer任务会把这个可执行文件作为一个单独的进程启动。 Reducer任务运行时，它把输入切分成行并把每一行提供给可执行文件进程的标准输入。 同时，reducer收集可执行文件进程标准输出的内容，并把每一行内容转化成key/value对，作为reducer的输出。 
-这是Map/Reduce框架和streaming mapper/reducer之间的基本通信协议。 
+如果一个可执行文件被用于mapper，则在mapper初始化时， 每一个mapper任务会把这个可执行文件作为一个单独的进程启动。 mapper任务运行时，它把输入切分成行并把每一行提供给可执行文件进程的标准输入。 同时，mapper收集可执行文件进程标准输出的内容，并把收到的每一行内容转化成key/value对，作为mapper的输出。 如果一个可执行文件被用于reducer，每个reducer任务会把这个可执行文件作为一个单独的进程启动。 Reducer任务运行时，它把输入切分成行并把每一行提供给可执行文件进程的标准输入。 同时，reducer收集可执行文件进程标准输出的内容，并把每一行内容转化成key/value对，作为reducer的输出。
+这是Map/Reduce框架和streaming mapper/reducer之间的基本通信协议。
 
 由于Hadoop是用Java开发的，在使用hadoop
 streming带来便利的同时，也存在一定的局限性，具体如下 1.
@@ -81,6 +82,6 @@ Hadoop Pipe语法为
          -input sample.txt \
          -output output \
          -program myCPProgram
-         
+
 这里再不做过多介绍， 感兴趣的读者可以参考
 Hadoop官方文档或者[@white2012hadoop]、@sammer2012hadoop。

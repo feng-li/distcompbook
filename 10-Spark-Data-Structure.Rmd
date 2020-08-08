@@ -1,4 +1,4 @@
-# Structured Data Processing with Spark
+# 利用Spark处理结构化数据
 
 ## spark SQL简介
 
@@ -15,7 +15,7 @@ Spark SQL的一种用途是执行SQL查询。 Spark SQL还可以用于从现有�
 
 数据集(Datasets)是数据的分布式集合。Datasets是Spark 1.6中添加的新接口，
 它具有RDD的优点（强类型输入，使用强大的Lambda函数的能力）以及Spark SQL优化的执行引擎的优点。
-可以从JVM对象构造Datasets，然后使用功能转换（map，flatMap，filter等）进行操作。 
+可以从JVM对象构造Datasets，然后使用功能转换（map，flatMap，filter等）进行操作。
 Dataset API在Scala和Java中可用。 Python不支持Dataset API。但是由于Python的动态特性，
 Python可以通过其他方式实现Dataset API的优势功能，例如，
 可以通过名称row.columnName来访问行的字段。
@@ -34,7 +34,7 @@ DataFrame API在Scala，Java，Python和R中可用。
 ### 创建Spark Session
 
 对于Spark DataFrame的所有操作的功能的入口点都是SparkSession类。SparkSession类似于Sparkcontext，
-可以被看作是专门面向Spark DataFrame的Sparkcontext。 
+可以被看作是专门面向Spark DataFrame的Sparkcontext。
 在Python中，要创建基本的SparkSession，只需导入`pyspark.sql`模块的`SparkSession`函数，
 使用`SparkSession.builder`命令创建：
 
@@ -53,16 +53,16 @@ DataFrame API在Scala，Java，Python和R中可用。
 
 #### 将RDD转换为DataFrame
 
-Spark SQL支持两种将现有RDD转换为数据集的方法。 
+Spark SQL支持两种将现有RDD转换为数据集的方法。
 第一种方法使用反射来推断包含特定对象类型的RDD的架构。这种基于反射的方法可以使代码更简洁，
 当用户在编写Spark应用程序时已经了解架构，这种方法可以很好地工作。
-创建数据集的第二种方法是通过编程界面，该界面允许用户构造模式，然后将其应用于现有的RDD。 
+创建数据集的第二种方法是通过编程界面，该界面允许用户构造模式，然后将其应用于现有的RDD。
 尽管此方法较为冗长，但可以在运行时才知道列及其类型的情况下构造数据集。
 
 ##### 使用反射推断架构
 
 Spark SQL可以将Row对象的RDD转换为DataFrame，从而推断数据类型。 通过将key/value 对的列表
-作为kwargs传递给Row类来构造行。 
+作为kwargs传递给Row类来构造行。
 此列表的键定义表的列名，并且通过对整个数据集进行采样来推断类型。
 使用people.txt文件作为示例，实现命令如下：
 
@@ -126,7 +126,7 @@ Spark SQL可以将Row对象的RDD转换为DataFrame，从而推断数据类型�
 使用以下命令可将创建的DataFrame转化成RDD：
 
      rdd1 = schemaPeople.rdd
-     
+
 在这个操作过程中并没有对数据进行变换，没有对原始数据做任何操作，只是将数据进行修饰，进行一些特殊描述，使得RDD也能操作这些数据。
 
 #### 直接从文件创建Spark DataFrame
@@ -148,7 +148,7 @@ Spark SQL不能自动推断CSV数据集的架构，直接使用JSON文件的创�
 以people.txt文件为例，创建命令如下：
 
      sdf_csv = spark.read.csv("/opt/apps/ecm/service/spark/2.4.4/package/spark-2.4.4-bin-hadoop2.7/examples/src/main/resources/people.txt")
-     
+
      # Import data types
      from pyspark.sql.types import *
      # The schema is encoded in a string.
@@ -157,7 +157,7 @@ Spark SQL不能自动推断CSV数据集的架构，直接使用JSON文件的创�
      schemaString = ["name", "age"]
      fields = [StructField(field_name, StringType(), True) for field_name in schemaString]
      schema = StructType(fields)
-     
+
      sdf_withschema = spark.createDataFrame(sdf_csv, schema)
      sdf_withschema.show()
 
@@ -167,7 +167,7 @@ Spark SQL不能自动推断CSV数据集的架构，直接使用JSON文件的创�
 
      # Save Spark DataFrame to a folder on the local disk.
      schemaPeople.write.mode('overwrite').csv("myspark/")
-     
+
 其中，`.mode()`指写入的形式。
 写入文件一般有三种形式，
 
@@ -180,9 +180,5 @@ Spark SQL不能自动推断CSV数据集的架构，直接使用JSON文件的创�
 使用以下命令可查看保存的DataFrame：
 
      # Let's check if everything is there on the local disk
-     import os 
-     os.listdir("myspark") 
-
-
-
-
+     import os
+     os.listdir("myspark")

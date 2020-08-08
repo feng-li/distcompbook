@@ -1,5 +1,4 @@
-
-# Spark Introduction
+# Spark 分布式计算平台
 
 ## Spark简介
 
@@ -181,7 +180,7 @@ BDAS系统包含如下内容：
     GraphX是基于BSP模型的图计算项目，在Spark上封装了类似Pregel的接口，进行大规模的同步全
     局的图计算，当用户进行多轮迭代的时候，基于Spark内存计算的GraphX优势更为明显。
 
--   MLlib/ML 
+-   MLlib/ML
 
     MLlib是Spark的可扩展机器学习库。它的目标是使实用的机器学习算法可扩展并容易使用。
     它提供包括机器学习算法、特征工程、管道、存储和其他实用工具。MLlib适用于Spark的API，
@@ -322,7 +321,7 @@ Spark的bin目录中的spark-submit脚本用于启动Spark集群上的应用程�
 
 传递给Spark的master URL可以采用以下格式之一：
 
-  Master URL                           含义                     
+  Master URL                           含义
   -------------------------------- -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
   local                            使用一个工作线程在本地运行Spark（即完全没有并行性）
   local[K]                         使用K个辅助线程在本地运行Spark（最好将其设置为计算机上的内核数）
@@ -360,7 +359,7 @@ R中还提供了示例应用程序，例如：
 然后即可导入`pyspark`模块
 
      import pyspark
-     
+
 ## Spark的数据集和并行化
 
 Spark中有两个可用的API：
@@ -526,7 +525,7 @@ Spark程序必须做的第一件事是创建一个SparkContext对象，该对象
      import findspark
      findspark.init("/usr/lib/spark-current")
      import pyspark
-     
+
      conf = pyspark.SparkConf().setAppName("My First Spark RDD APP").setMaster("local")  # “yarn”
      sc = pyspark.SparkContext(conf=conf)
 
@@ -534,7 +533,7 @@ Spark程序必须做的第一件事是创建一个SparkContext对象，该对象
 停止SparkContext命令代码：
 
      sc.stop()
-     
+
 或在创建SparkContext时使用容错功能，避免在创建时因已有SparkContext而产生创建错误：
 
      sc = pyspark.SparkContext.getOrCreate()
@@ -545,14 +544,14 @@ Spark程序必须做的第一件事是创建一个SparkContext对象，该对象
 
      data = [1, 2, 3, 4, 5]
      distData = sc.parallelize(data)
-     
+
 可以同时创建多个并行化数据集，如可以同时创建data2：
 
      data2 = [11, 21, 31, 41, 51]
      distData2 = sc.parallelize(data2)
 
-创建后，可以并行处理分布式数据集(distData)。 例如，我们可以调用命令`distData.reduce(lambda a,b:a + b)`来添加列表中的元素。 
-并行集合的一个重要参数是将数据集切入的分区数。 Spark将为集群的每个分区运行一个任务。 通常，群集中的每个CPU都需要2-4个分区。 通常，Spark会尝试根据集群自动设置分区数。 但是，也可以通过将其作为第二个参数传递来进行手动设置（例如`sc.parallelize(data,10)`）。 
+创建后，可以并行处理分布式数据集(distData)。 例如，我们可以调用命令`distData.reduce(lambda a,b:a + b)`来添加列表中的元素。
+并行集合的一个重要参数是将数据集切入的分区数。 Spark将为集群的每个分区运行一个任务。 通常，群集中的每个CPU都需要2-4个分区。 通常，Spark会尝试根据集群自动设置分区数。 但是，也可以通过将其作为第二个参数传递来进行手动设置（例如`sc.parallelize(data,10)`）。
 
 ### 使用RDD的外部数据集
 
@@ -586,7 +585,7 @@ Spark的缓存是容错的，如果RDD的任何分区丢失，它将使用最初
 缓存命令实例如下：
 
      lineLengths.persist()
-     
+
      lineLengths.cache() # same as persist() but use default storage level
 
 #### RDD不同的存储级别
@@ -615,7 +614,7 @@ Spark自动监视每个节点上的缓存使用情况，并以最近最少使用
 
 ### 共享变量(shared variables)
 
-通常，当在远程集群节点上执行传递给Spark操作的函数（例如map或reduce）时，这个函数将对该函数中使用的所有变量的单独副本起作用。 这些变量将复制到每台计算机上，并且远程计算机上的变量的更新都不会传播回驱动程序。在这种通常的情况下，在各个任务之间读写共享变量的效率很低。 但是，Spark为两种常用用法模式提供了两种有限类型的共享变量：广播变量（broadcast variables）和累加器（accumulators）。 
+通常，当在远程集群节点上执行传递给Spark操作的函数（例如map或reduce）时，这个函数将对该函数中使用的所有变量的单独副本起作用。 这些变量将复制到每台计算机上，并且远程计算机上的变量的更新都不会传播回驱动程序。在这种通常的情况下，在各个任务之间读写共享变量的效率很低。 但是，Spark为两种常用用法模式提供了两种有限类型的共享变量：广播变量（broadcast variables）和累加器（accumulators）。
 
 #### 广播变量（broadcast variables）
 
@@ -630,7 +629,7 @@ Spark动作是通过一组阶段执行的，这些阶段由分布式“随机”
      broadcastVar.value
 
 创建广播变量之后，在集群上运行的任何函数中都应使用它代替值v，以使v不会多次传送给节点。 另外，对象v在广播后不应修改，以确保所有节点都具有相同的广播变量值（例如，如果变量稍后被传送到新节点）。
-     
+
 #### 累加器（accumulators）
 
 累加器是仅通过关联和交换操作“添加”的变量，因此可以有效地并行支持。它们可用于实现计数器（如MapReduce中的计数器）或求和。 Spark本身支持数字类型的累加器，程序员可以添加对新类型的支持。
@@ -686,7 +685,7 @@ MLlib将NumPy的数组和Python的列表（例如[1,2,3]）识别为密集向量
 
 ### Local matrix局部矩阵
 
-局部矩阵具有整数类型的行和列索引以及双重类型的值，它们存储在单个计算机上。 MLlib支持密集矩阵（其条目值以列优先顺序存储在单个double数组中）和稀疏矩阵（其非零条目值以压缩列稀疏列CSC格式以列优先顺序存储）。 
+局部矩阵具有整数类型的行和列索引以及双重类型的值，它们存储在单个计算机上。 MLlib支持密集矩阵（其条目值以列优先顺序存储在单个double数组中）和稀疏矩阵（其非零条目值以压缩列稀疏列CSC格式以列优先顺序存储）。
 局部矩阵的基类是Matrix，我们提供两种实现：`DenseMatrix`和`SparseMatrix`。 我们建议使用在矩阵中实现的factory methods 来创建本地矩阵。 要注意的是，MLlib中的本地矩阵以列优先顺序存储。
 实现命令如下：
 
@@ -794,4 +793,3 @@ BlockMatrix是由MatrixBlocks的RDD支持的分布式矩阵，其中MatrixBlock�
 
      # Convert to a CoordinateMatrix.
      coordinateMat = mat.toCoordinateMatrix()
-

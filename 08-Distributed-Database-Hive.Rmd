@@ -1,4 +1,4 @@
-# Distribute Database Hive
+# 分布式数据库
 
 ## Hive简介
 
@@ -596,7 +596,7 @@ Define Function)。
       位与操作:    A & B      所有数值类型                                         返回A和B按位进行与操作的结果。结果的数值类型等于A的类型和B的类型的最小父类型（详见数据类型的继承关系）
       位或操作     A \| B     所有数值类型                                         返回A和B按位进行或操作的结果。结果的数值类型等于A的类型和B的类型的最小父类型（详见数据类型的继承关系）
       位异或操作   A B̂        所有数值类型                                         返回A和B按位进行异或操作的结果。结果的数值类型等于A的类型和B的类型的最小父类型（详见数据类型的继承关系）
-      位取反操作    A         返回A按位取反操作的结果。结果的数值类型等于A的类型   
+      位取反操作    A         返回A按位取反操作的结果。结果的数值类型等于A的类型
 
       : 数学运算[]{label="tab:Hive-Arithmetic Operators"}
 
@@ -606,7 +606,7 @@ Define Function)。
       ------------ --------- -------------------------------------------------- -------------------------------------------------------------------------
       逻辑与操作   A AND B   boolean                                            如果A和B均为TRUE，则为TRUE；否则为FALSE。如果A为NULL或B为NULL，则为NULL
       逻辑或操作   A OR B    boolean                                            如果A为TRUE，或者B为TRUE，或者A和B均为TRUE，则为TRUE；否则为FALSE
-      逻辑非操作   NOT A     如果A为FALSE，或者A为NULL，则为TRUE；否则为FALSE   
+      逻辑非操作   NOT A     如果A为FALSE，或者A为NULL，则为TRUE；否则为FALSE
 
       : 逻辑运算[]{label="tab:Hive-Logical Operators"}
 
@@ -747,4 +747,3 @@ HBase是Google Bigtable的开源实现，目前已是Apache众多开源项目中
 HBase是一个可以随机访问的存储和检索数据的平台，它可以是一种键值存储、面向列族的数据库，也可以是一种存储多时间戳版本映射的数据库。HBase支持存储结构化和半结构化的数据，支持多种数据类型，允许动态的、灵活的数据模型，支持行级更新、快速查询和行级替换（但不支持多行替换）。
 HBase没有提供类似于Hive内使用的通用查询语言，但新版本的Hive提供了一种可以直接同HBase交互的方式，通过这种方式使用时相当于连接外部的HBase数据库。
 与HBase有关的更多信息，请参见HBase主页https://hbase.apache.org/。
-

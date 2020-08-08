@@ -1,4 +1,3 @@
-# Text Processing with Spark
 # 使用Spark进行文本处理
 
 ## 文本处理中的概念
@@ -43,7 +42,7 @@ Token是“符号”的高级表达。一般指具有某种意义，无法再分
 ### 命名实体识别(Named Entity Recognizer)
 
 命名实体识别（NER），是一个标准的自然语言处理问题，也是信息提取的子任务。 其主要目的是将文本中的命名实体定位并分类为预定义的类别，例如人员名称，组织，位置，事件，时间表达，数量，货币价值，百分比等。
-简而言之，NER负责从文本中提取真实世界的实体，例如个人，组织或事件。 
+简而言之，NER负责从文本中提取真实世界的实体，例如个人，组织或事件。
 命名的实体识别也简称为实体标识，实体组块和实体提取。 它们与POS（词性）标签非常相似。
 NER是自然语言处理实用化的重要内容，在信息提取、句法分析、机器翻译等应用领域中具有重要的基础性作用。
 
@@ -154,7 +153,7 @@ RegexTokenizer是基于正则表达式的 Tokenizer，可以通过使用提供�
      yspark.ml.feature.RegexTokenizer(minTokenLength=1, gaps=True, pattern='\s+', inputCol=None, outputCol=None, toLowercase=True)
 
 使用Tokenizer和RegexTokenizer进行处理的实例如下：
-     
+
      from pyspark.ml.feature import Tokenizer, RegexTokenizer
      from pyspark.sql.functions import col, udf
      from pyspark.sql.types import IntegerType
@@ -231,7 +230,7 @@ NGram将字符串序列作为输入（例如Tokenizer的输出），输入数组
      ngramDataFrame.select("ngrams").show(truncate=False)
 
 
-### 使用LDA进行主题建模
+## 使用LDA进行主题建模
 
 Latent Dirichlet Allocation (LDA)是支持`EMLDAOptimizer`和`OnlineLDAOptimizer`的Estimator，并生成LDAModel作为基础模型。如果需要，用户可以将`EMLDAOptimizer`生成的LDAModel强制转换为DistributedLDAModel。
 LDA是一种为文本文档设计的主题模型，它是一种无监督的方法，基于Dirichlet分布对文档和主题进行建模。其中，每个文档都被认为是各个主题的分布，而每个主题都被认为是单词的分布。因此，给定文档集合，LDA输出一组主题，每个主题与一组单词相关联。
@@ -269,4 +268,3 @@ LDA是一种为文本文档设计的主题模型，它是一种无监督的方�
      # Shows the result
      transformed = model.transform(dataset)
      transformed.show(truncate=False)
-

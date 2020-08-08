@@ -1,5 +1,4 @@
-# Modeing Streaming Data With Spark
-# 使用Spark处理流数据
+# 使用Spark进行流数据建模
 
 ## Spark Streaming概述
 
@@ -24,10 +23,10 @@ DStreams可以根据来自诸如Kafka，Flume和Kinesis之类的源的输入数�
 
 ### 实例
 
-在介绍编写Spark Streaming程序的细节之前，让我们快速了解一下简单的Spark Streaming程序。 
+在介绍编写Spark Streaming程序的细节之前，让我们快速了解一下简单的Spark Streaming程序。
 假设我们要计算从TCP接口接收到的文本数据中的单词数。所需操作如下：
 
-首先，导入StreamingContext，这是所有流功能的主要入口点。 
+首先，导入StreamingContext，这是所有流功能的主要入口点。
 创建具有两个执行线程和1秒批处理间隔的本地StreamingContext。
 
      from pyspark import SparkContext
@@ -177,7 +176,7 @@ Operations）可以将DStream的数据输出到外部的数据库或文件系统
 ### 窗口操作
 
 SparkStreaming提供了基于窗口（Window）的计算，即可以通过一个滑动窗口，对原始DStream的数据进行转换，得到一个新的DStream。
-这里涉及到两个参数的设定： 
+这里涉及到两个参数的设定：
 （1）窗口长度（windowlength）：一个窗口覆盖的流数据的时间长度，必须是批处理时间间隔的倍数。窗口长度决定了一个窗口内包含多少个batch的数据。
 （2）窗口滑动时间间隔（slideinterval）：前一个窗口到后一个窗口所经过的时间长度，必须是批处理时间间隔的倍数。
 
@@ -196,7 +195,7 @@ SparkStreaming提供了基于窗口（Window）的计算，即可以通过一个
   reduceByKeyAndWindow(func, windowLength, slideInterval, [numTasks])              在(K,V)对的DStream上调用时，返回新的(K,V)对的DStream，其中使用给定的`reduce`函数func在滑动窗口中的批处理上汇总每个键的值。注意：默认情况下，使用Spark的默认并行任务数（本地模式为2，而在集群模式下，此数量由`config`属性`spark.default.parallelism`确定）进行分组。 可以传递一个可选的`numTasks`参数来设置不同数量的任务。
   reduceByKeyAndWindow(func, invFunc, windowLength, slideInterval, [numTasks])    上述`reduceByKeyAndWindow()`的更有效的版本，其中，使用前一个窗口的缩减值递增地计算每个窗口的缩减值。这是通过减少进入滑动窗口的新数据并“逆向减少”离开窗口的旧数据来完成的。一个示例是在窗口滑动时“增加”和“减少”键的计数。但是，它仅适用于“可逆归约函数”，即具有相应“逆归约”功能（作为参数`invFunc`的归约）的归约函数。像`reduceByKeyAndWindow`中一样，reduce任务的数量可以通过可选参数配置。请注意，必须启用检查点才能使用此操作。
   countByValueAndWindow(windowLength, slideInterval, [numTasks])                   在(K,V)对的DStream上调用时，返回新的(K,Long)对的DStream，其中每个键的值是其在滑动窗口内的频率。像`reduceByKeyAndWindow`中一样，reduce任务的数量可以通过可选参数配置。
-  
+
 ### 外部数据来源
 
 从Spark 2.4.5开始，Python API中提供了Kafka，Kinesis和Flume。
@@ -205,7 +204,7 @@ SparkStreaming提供了基于窗口（Window）的计算，即可以通过一个
 这些高级资源如下。
 -    Kafka：Spark Streaming 2.4.5与Kafka代理0.8.2.1或更高版本兼容。有关更多详细信息，请参见《 Kafka集成指南》。
 -    Flume：Spark Streaming 2.4.5与Flume 1.6.0兼容。有关更多详细信息，请参见《 Flume集成指南》。
--    Kinesis：Spark Streaming 2.4.5与Kinesis Client Library 1.2.1兼容。有关更多详细信息，请参见《 Kinesis集成指南》。  
+-    Kinesis：Spark Streaming 2.4.5与Kinesis Client Library 1.2.1兼容。有关更多详细信息，请参见《 Kinesis集成指南》。
 
 ### 容错机制
 
@@ -250,8 +249,3 @@ Spark Streaming支持两种类型的检查点：
     //启动context
     context.start()
     context.awaitTermination()
-
-
-
-
-
