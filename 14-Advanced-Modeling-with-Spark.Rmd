@@ -1,4 +1,3 @@
-# Advanced Statistical Modelling with Spark
 # 使用Spark进行高级统计建模
 
 利用Spark进行统计计算时，Spark会提供一些基础方法，但有时待处理问题的应用场景非常复杂，Spark现有工具不足够高效的进行处理以满足应用要求。因此可能需要使用Spark构建额外的统计计算工具，充分借鉴Spark现有优势，达到大规模数据处理的要求。
@@ -108,20 +107,20 @@ DLSA算法输入的是用于对每个分区数据集进行建模的模型函数�
 
 将分布式系统中的DLSA计算方法应用于飞机延误数据，应用数据的具体细节见下表：
 
-Variable        Description                                            Variable used in the model 
+Variable        Description                                            Variable used in the model
 --------------  ----------------------------------------------------- ---------------------------------------------------
-Delayed         Whether the ﬂight is delayed, 1 for Yes; 0 for No      Used as the response variable 
-Year            Year between 1987 and 2008                             Used as numerical variable 
-Month           Which month of the year                                Converted to 11 dummies 
-DayofMonth      Which day of the month                                 Used as numerical variable 
-DayofWeek       Which day of the week                                  Converted to 6 dummies 
-DepTime         Actual departure time                                  Used as numerical variable 
-CRSDepTime      Scheduled departure time                               Used as numerical variable 
-CRSArrTime      Scheduled arrival time                                 Used as numerical variable 
-ElapsedTime     Actual elapsed time                                    Used as numerical variable 
-Distance        Distance between the origin and destination in miles   Used as numerical variable 
+Delayed         Whether the ﬂight is delayed, 1 for Yes; 0 for No      Used as the response variable
+Year            Year between 1987 and 2008                             Used as numerical variable
+Month           Which month of the year                                Converted to 11 dummies
+DayofMonth      Which day of the month                                 Used as numerical variable
+DayofWeek       Which day of the week                                  Converted to 6 dummies
+DepTime         Actual departure time                                  Used as numerical variable
+CRSDepTime      Scheduled departure time                               Used as numerical variable
+CRSArrTime      Scheduled arrival time                                 Used as numerical variable
+ElapsedTime     Actual elapsed time                                    Used as numerical variable
+Distance        Distance between the origin and destination in miles   Used as numerical variable
 Carrier         Flight carrier code for 29 carriers                    Top 7 carries converted to 7 dummies
-Destination     Destination of the ﬂight (total 348 categories)        Top 75 destination cities converted to 75 dummies 
+Destination     Destination of the ﬂight (total 348 categories)        Top 75 destination cities converted to 75 dummies
 Origin          Departing origin (total 343 categories)                Top 75 origin cities converted to 75 dummies
 
 其中，Delayed为因变量，其他变量为自变量。
@@ -144,16 +143,3 @@ Origin          Departing origin (total 343 categories)                Top 75 or
 -    数据存储：传统统计计算的统计模型与数据存储一体化，而分布式统计计算模型的模型与数据分别存储，计算时将统计模型部署到数据
 -    计算逻辑：传统统计计算为单个模型对应单个算法，模型之间各异，算法不互通，分布式统计计算模型采取所有模型一体化计算框架，每种模型均可以通过此框架在分布式系统内实现，模型的适用性更高
 -    需求实现：传统统计模型采取线下模型评估线上应用模式，模型的时效性不能得到保证，分布式统计计算模型采取实时模型评估与预测需求的模式，模型的时效性更能得到保障，满足了目前大多数的应用需求
-
-
-
-
-
-
-
-
-
-
-
-
-

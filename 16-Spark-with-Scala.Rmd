@@ -1,10 +1,10 @@
-# Spark with Scala
+# 基于Scala语言的Spark
 
 ## Scala与Python对比
 
 Spark用Scala编写，因为它是静态类型的，并且可以以已知的方式编译到JVM，因此它可以非常快地进行编写。
-尽管Spark拥有适用于Scala，Python，Java和R的API，但流行的语言是前两种。因为Java不支持Read-Evaluate-Print-Loop(REPL)，而R不是通用语言。 
-目前数据科学界分为两个阵营，一个偏爱Scala，另一个偏爱Python。 
+尽管Spark拥有适用于Scala，Python，Java和R的API，但流行的语言是前两种。因为Java不支持Read-Evaluate-Print-Loop(REPL)，而R不是通用语言。
+目前数据科学界分为两个阵营，一个偏爱Scala，另一个偏爱Python。
 Scala与Python都有其优点和缺点，最终的选择应取决于用户应用的需求。
 若用户想对spark进行深入建模，开发新的模型，就需要知道它的底层构造，这时学习Scala是非常必要的；而若用户只是想使用spark里既有接口中的模型方法，不想开发新的模型，就可以直接使用python。
 
@@ -12,7 +12,7 @@ Scala与Python都有其优点和缺点，最终的选择应取决于用户应用
 
 ### 性能
 
-从性能上说，Scala的运行速度通常比Python快10倍以上。 
+从性能上说，Scala的运行速度通常比Python快10倍以上。
 编译语言比解释语言运行速度更快。Scala是静态类型的，在运行时使用Java虚拟机（JVM），在大多数情况下，它比Python快一些。Python是动态类型的，这会降低速度。
 Python使用时需调用Spark库，这需要大量代码处理，因此性能也会降低。
 Python通过spark处理海量数据时需要很多的内存以实现cache功能。Scala是静态的，它对变量进行提前声明，在计算过程中节省大量计算空间。在这种情况下，Scala对于有限的内核非常有效。
@@ -22,27 +22,27 @@ Python通过spark处理海量数据时需要很多的内存以实现cache功能�
 
 Scala与Python都是功能性和面向对象的语言，除了支持社区活跃外，它们还具有相似的语法。
 Python具有简单的语法和良好的标准库。由于Scala中的高级功能，与Python相比，Scala学习起来可能更加复杂。
-Python对于简单直观的逻辑更可取，而Scala对于复杂的工作流程则更有用。 
- 
+Python对于简单直观的逻辑更可取，而Scala对于复杂的工作流程则更有用。
+
 ### 适用性
 
 Scala具有多个标准库和核，可以在大数据生态系统中快速集成数据库。 Scala允许编写具有多个并发原语的代码，而Python不支持并发或多线程。由于具有并发功能，Scala可以实现更好的内存管理和数据处理。
 但是，Python支持重量级的流程派生。在此，一次仅一个线程处于活动状态。因此，无论何时部署新代码，都必须重新启动进程，这会增加内存开销。
- 
+
 ### 可用性
 
-两者都是富有表现力的，我们可以通过它们达到较高的功能水平。 
+两者都是富有表现力的，我们可以通过它们达到较高的功能水平。
 在框架，库，隐式，宏等方面，Scala更为强大。由于其功能性质，Scala在MapReduce框架中运行良好。许多Scala数据框架遵循与Scala的API集合类似的抽象数据类型。开发人员只需要学习基本的标准集合，就可以轻松地熟悉其他库。Spark是用Scala编写的，因此了解Scala可以让您了解和修改Spark在内部所做的工作。此外，许多即将发布的功能往往首先发布在Scala和Java中的API，而Python API在以后的版本中会不断发展。
 Python更加用户友好和简洁。对于NLP，Python是首选，因为Scala没有很多用于机器学习或NLP的工具。此外，要使用GraphX，GraphFrames和MLLib，Python也是首选。Python的可视化库补充了Pyspark，这是Spark和Scala不可比拟的。
- 
+
 ### 代码恢复与安全
 
 Scala是一种静态类型的语言，它使我们能够发现编译时的错误。而Python是一种动态类型化的语言。每当用户对现有代码进行更改时，Python语言极容易出现错误。因此，为Scala重构代码比为Python重构更容易。
- 
+
 ### 结论
 
-Python速度较慢，但非常易于使用，而Scala速度快，且也较为易于使用。 
-Scala提供对Spark最新功能的访问，因为Apache Spark是用Scala编写的。 
+Python速度较慢，但非常易于使用，而Scala速度快，且也较为易于使用。
+Scala提供对Spark最新功能的访问，因为Apache Spark是用Scala编写的。
 Apache Spark编程语言的选择取决于最适合项目需求的功能，因为每个语言各有优缺点。 Python更加面向分析，而Scala更加面向工程，但是两者都是用于构建数据科学应用程序的出色语言。总体而言，为了充分利用Spark的潜力，Scala将更加有益。如果用户只是想通过Spark进行开箱即用的机器学习，那么Python是值得学习的。
 
 
@@ -84,7 +84,7 @@ Scala REPL（“Read-Evaluate-Print-Loop”）是命令行解释器，您可以�
 要启动REPL会话，只需在操作系统命令行中键入scala，您将看到以下内容：
 
      $ scala
-     
+
      Welcome to Scala 2.13.0 (Java HotSpot(TM) 64-Bit Server VM, Java 1.8.0_131).
      Type in expressions for evaluation. Or try :help.
 
@@ -154,7 +154,7 @@ BigInt和BigDecimal的一大优点是它们支持习惯于使用数字类型的�
      var b2 = BigDecimal(123456.789)
 
      b0 + b1
-     b0 += 1 
+     b0 += 1
      b1 * b1
 
 #### 列表
@@ -177,7 +177,7 @@ Scala中的List类是线性的、不变的序列。这意味着它是一个用�
 因此，当使用`+:`时List必须在右边，将该元素添加到List的左边。
 
      val c1 = ints :+ 4
- 
+
      val c2 = ints :+ List(4,5)
 
 
@@ -254,17 +254,17 @@ Scala的`try/catch`控制结构可捕获异常。其与Java中相应结构类似
 Scala的`for`循环如下所示：
 
      for (arg <- args) println(arg)
-     
+
      // "x to y" syntax
      for (i <- 0 to 5) println(i)
-     
+
      // "x to y by" syntax
      for (i <- 0 to 10 by 2) println(i)
 
 还可以将`yield`关键字添加到`for`循环中，以创建产生结果的`for`表达式。 这是一个`for`表达式，它将序列1到5中的每个值加倍：
 
      val x = for (i <- 1 to 5) yield i * 2
-     
+
 这是另一个用于迭代字符串列表的表达式：通过`for`循环能自动再生成一个变量
 
      val fruits = List("apple", "banana", "lime", "orange")
@@ -289,7 +289,7 @@ Scala还具有`while`和`do/while`循环。它的一般语法如下：
      do {
         statement(a)
         statement(b)
-     } 
+     }
      while(condition)
 
 #### Scala Classes
@@ -338,21 +338,21 @@ Spark的`MLlib`支持存储在一台机器上的局部向量和矩阵，以及�
 
 本地使用Scala中的`Breeze`模块示例如下：
 
-     import breeze.linalg._  
+     import breeze.linalg._
 
-     val x = DenseVector.zeros[Double](5)  
+     val x = DenseVector.zeros[Double](5)
 
 ### 使用Scala进行Spark Matrix操作
 
 #### 局部向量
 
-局部向量具有存储在单个计算机上的整数类型索引和基于0的索引以及双精度类型的值。 
+局部向量具有存储在单个计算机上的整数类型索引和基于0的索引以及双精度类型的值。
 `MLlib`支持两种类型的局部向量：密集和稀疏。密集向量由表示其输入值的双精度数组支持，而稀疏向量由两个并行数组支持：索引和值。例如，向量(1.0, 0.0, 3.0)可以用密集格式表示为[1.0, 0.0, 3.0]，也可以用稀疏格式表示为(3, [0, 2], [1.0, 3.0])，其中3是向量的大小。
 
 局部向量的基类是Vector，Scala中提供两种实现：DenseVector和SparseVector。 建议使用Vector中实现的工厂方法来创建局部矢量。
 有关API的详细信息，请参考Vector Scala文档和Vectors Scala文档。
 
-     import org.apache.spark.ml.linalg.{Vector, Vectors}  
+     import org.apache.spark.ml.linalg.{Vector, Vectors}
 
      // Create a dense vector (1.0, 0.0, 3.0).
      val dv: Vector = Vectors.dense(1.0, 0.0, 3.0)
@@ -365,7 +365,7 @@ Spark的`MLlib`支持存储在一台机器上的局部向量和矩阵，以及�
 
 #### 标记点
 
-标记点(Labeled point)是与标记/响应关联的局部矢量，可以是稠密的或稀疏的。在`MLlib`中，标记点用于监督学习算法中。 
+标记点(Labeled point)是与标记/响应关联的局部矢量，可以是稠密的或稀疏的。在`MLlib`中，标记点用于监督学习算法中。
 使用双精度来存储标签，因此我们可以在回归和分类中使用带标签的点。 对于二进制分类，标签应为0（负数）或1（正数）。 对于多类分类，标签应为从零开始的类索引：0, 1, 2, ....。
 
 Scala中标记点由案例类`LabeledPoint`实现。
@@ -373,7 +373,7 @@ Scala中标记点由案例类`LabeledPoint`实现。
 
      import org.apache.spark.mllib.linalg.Vectors
      import org.apache.spark.mllib.regression.LabeledPoint
-     
+
      // Create a labeled point with a positive label and a dense feature vector.
      val pos = LabeledPoint(1.0, Vectors.dense(1.0, 0.0, 3.0))
 
@@ -384,8 +384,8 @@ Scala中标记点由案例类`LabeledPoint`实现。
 
 本地矩阵(Local matrix)具有整数类型的行和列索引以及双重类型的值，它们存储在单个计算机上。 `MLlib`支持密集矩阵（其条目值以列优先顺序存储在单个双精度数组中）和稀疏矩阵（其非零条目值）以列稀疏顺序以压缩稀疏列（CSC）格式存储。
 
-Local matrix的基类是Matrix，Scala中提供两种实现：DenseMatrix和SparseMatrix。 
-我们建议使用在Matrix中实现的工厂方法来创建Local matrix。 
+Local matrix的基类是Matrix，Scala中提供两种实现：DenseMatrix和SparseMatrix。
+我们建议使用在Matrix中实现的工厂方法来创建Local matrix。
 MLlib中的Local matrix以列优先顺序存储。
 有关API的详细信息，请参考Matrix Scala文档和Matrices Scala文档。
 
@@ -405,7 +405,7 @@ MLlib中的Local matrix以列优先顺序存储。
 
 ##### RowMatrix
 
-可以从RDD[Vector]实例创建RowMatrix。然后可以计算其列摘要统计信息和分解。 
+可以从RDD[Vector]实例创建RowMatrix。然后可以计算其列摘要统计信息和分解。
 QR分解的形式为$A = QR$，其中Q为正交矩阵，R为上三角矩阵。 有关奇异值分解（SVD）和主成分分析（PCA），请参阅Dimensionality reduction。
 有关API的详细信息，请参考RowMatrix Scala文档。
 
@@ -420,7 +420,7 @@ QR分解的形式为$A = QR$，其中Q为正交矩阵，R为上三角矩阵。 �
      val m = mat.numRows()
      val n = mat.numCols()
 
-     // QR decomposition 
+     // QR decomposition
      val qrResult = mat.tallSkinnyQR(true)
 
 ##### IndexedRowMatrix
@@ -443,9 +443,9 @@ QR分解的形式为$A = QR$，其中Q为正交矩阵，R为上三角矩阵。 �
 
 ##### CoordinateMatrix
 
-CoordinateMatrix是由其条目的RDD支持的分布式矩阵。每个条目都是(i: Long, j: Long, value: Double)的元组，其中i是行索引，j是列索引，value是条目值。 
+CoordinateMatrix是由其条目的RDD支持的分布式矩阵。每个条目都是(i: Long, j: Long, value: Double)的元组，其中i是行索引，j是列索引，value是条目值。
 仅当矩阵的两个维度都很大且矩阵非常稀疏时，才应使用CoordinateMatrix。
-可以从RDD[MatrixEntry]实例创建CoordinateMatrix，其中MatrixEntry是(Long, Long, Double)的包装。 
+可以从RDD[MatrixEntry]实例创建CoordinateMatrix，其中MatrixEntry是(Long, Long, Double)的包装。
 通过调用`toIndexedRowMatrix`，可以将CoordinateMatrix转换为具有稀疏行的IndexedRowMatrix。目前不支持CoordinateMatrix的其他计算。
 有关API的详细信息，请参阅CoordinateMatrix Scala文档。
 
@@ -463,8 +463,8 @@ CoordinateMatrix是由其条目的RDD支持的分布式矩阵。每个条目都�
      val indexedRowMatrix = mat.toIndexedRowMatrix()
 
 ##### BlockMatrix
-块矩阵(BlockMatrix)是由MatrixBlocks的RDD支持的分布式矩阵，其中MatrixBlock是 ((Int, Int), Matrix)的元组，其中(Int, Int)是块的索引，而Matrix是给定索引处的矩阵，其大小为rowsPerBlock x colsPerBlock。 
-BlockMatrix支持诸如与另一个BlockMatrix相加和相乘的方法。 
+块矩阵(BlockMatrix)是由MatrixBlocks的RDD支持的分布式矩阵，其中MatrixBlock是 ((Int, Int), Matrix)的元组，其中(Int, Int)是块的索引，而Matrix是给定索引处的矩阵，其大小为rowsPerBlock x colsPerBlock。
+BlockMatrix支持诸如与另一个BlockMatrix相加和相乘的方法。
 BlockMatrix还具有一个验证器帮助功能，该功能可用于检查BlockMatrix是否正确设置。
 
 通过调用`toBlockMatrix`，可以容易地从IndexedRowMatrix或CoordinateMatrix创建BlockMatrix。 `toBlockMatrix`默认创建大小为1024 x 1024的块。 用户可以通过`toBlockMatrix(rowsPerBlock, colsPerBlock)`提供值来更改块大小。
@@ -484,5 +484,3 @@ BlockMatrix还具有一个验证器帮助功能，该功能可用于检查BlockM
 
      // Calculate A^T A.
      val ata = matA.transpose.multiply(matA)
-
-
