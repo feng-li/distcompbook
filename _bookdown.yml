@@ -34,5 +34,6 @@ rmd_files: ["index.Rmd",
             "14-Advanced-Modeling-with-Spark.Rmd",
             "15-Modeling-Streaming-Data-with-Spark.Rmd",
             "16-Spark-with-Scala.Rmd",
+            "A1-Install-Hadoop-Hive-Spark.Rmd",
             "99-References.Rmd"
  ]
