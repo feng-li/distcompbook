@@ -63,9 +63,7 @@ Hive, Spark, Storm。
 高了服务器的使用效率，同时，数据中心所花费的电力、空调费、所占空间等费用也减少了，管理起来
 更加方面，所需要的人也更少。这也是为什么如今各大公司都在部署分布式存储。
 
-
 ## 分布式计算挑战
-
 
 不论是并行计算还是分布式计算，在数据科学进化浪潮中，软件扮演着非常积极的角色。分布式程序要
 比串行程序难写得多，因为要把程序分割成几个子程序，而且需要子程序之间的同步与高效通信是非常
@@ -85,3 +83,163 @@ Hive, Spark, Storm。
 通信模式迥异，同构异构并存，这使得为超级计算机编写程序变得更加困难。另外，并行计算机耗能极
 大，“天河二号”每年花掉的电费高达亿元人民币！超级计算机占地面积庞大、功耗高，并不能够广泛地
 使用。
+
+## 案例：并行计算与普通顺序计算的区别
+
+本节将给出案例与相应代码示例，展示并行计算与普通顺序计算在时间消耗上的区别。并行计算可使用多个处理器同时执行计算，其计算耗时理论上应少于普通顺序计算。本节案例如下：分别使用并行计算与普通顺序计算查找本机系统F盘中文件名含有'win'的所有文件，输出其路径，并比较两种计算方式所需时间差异。
+要实现相应要求，首先应有可获得带有特定字符串的文件的函数，相应的python代码如下所示：
+
+       import os
+       import time
+       import multiprocessing as mp
+
+       def find_specific_file(file_path):
+           """function to find files in file_path containing the specific word 'win'."""
+           for curdir, dirs, files in os.walk(file_path):
+               for file in files:
+                   (filename, extension) = os.path.splitext(file)
+                   if ('win' in filename):
+                       print(os.path.join(curdir, file))
+
+该函数仅有一个参数`file_path`，该参数为需要查找的路径，本案例中为本机系统F盘。使用并行计算与普通顺序计算运行上述函数并比较时间的python代码如下所示：
+
+       if __name__ == "__main__":
+           time1 = time.time()
+           find_specific_file('F:\\')
+           time2 = time.time()
+           pool = mp.Pool(8)
+           time3 = time.time()
+           for curdir, dirs, files in os.walk('F:\\'):
+               a = [os.path.join(curdir, i) for i in dirs]
+               pool.map(find_specific_file, a)
+               pool.close()
+               pool.join()
+               break
+           time4 = time.time()
+           print('singleprocess_time:',time2-time1)
+           print('multiprocess_time:', time4-time3)
+
+上述函数运行结果中，并行计算耗时与普通顺序计算耗时相仿，并行计算耗时有时甚至会稍多于普通顺序计算，并行计算在计算时间上并未体现出优势。本代码示例中并行计算未显示出优势的原因为，本代码中并行计算并行执行的任务为在查找路径下所有文件夹中进行含特定字符串文件的查找，在并行计算过程中，查找路径下所有文件夹的提取与各文件夹任务在处理器上的分配都会消耗时间，这会导致系统耗时过高，即使计算时间有所减少，总耗时并不会有明显减少。
+为了减少系统耗时带来的影响，更明显的感受并行计算与普通顺序计算在时间消耗上的区别，修改本文案例为：用并行计算与普通顺序计算查找本机系统F盘中文件名含有'win'或'bin'、'to'的所有文件，输出其路径，并比较两种计算方式所需时间差异。修改后的案例直接给出三个计算任务，这样并行计算时任务的分配耗时就会大大减少。相应的python代码如下所示：
+
+       import os
+       import time
+       import multiprocessing as mp
+
+       def find_specific_file(file_path,find_word):
+           """function to find files in file_path containing the specific word"""
+           textname_list = []
+           for root,dirs,files in os.walk(file_path):
+               for file in files:
+                   if find_word in os.path.splitext(file)[0]:
+                       textname_list.append(os.path.join(root,file))
+           return textname_list
+
+       if __name__ == '__main__':
+           filedir = 'F:\\'
+           findword = ['win','bin','to']
+           time1 = time.time()
+           filelist = []
+           for word in findword:
+               file = find_specific_file(filedir,word)
+               filelist.extend(file)
+           print(filelist)    
+           time2 = time.time()
+           pool = mp.Pool(8)
+           time3 = time.time()
+           rel = pool.starmap_async(find_specific_file, iterable=[(filedir, word) for word in findword]).get()
+           print(rel)     
+           pool.close()
+           pool.join()
+           time4 = time.time()
+           print('singleprocess_time:', time2-time1)
+           print('multiprocess_time:', time4-time3)
+
+上述代码中对获得带有特定字符串的文件的函数`find_specific_file`进行改进，使其可输入两个参数即`file_path`与`find_word`，该参数分别代表需要查找的路径与需要查找的特定字符串。由于`find_specific_file`函数有两个参数，并行计算函数相应改为`starmap_async`。函数运行结果显示，并行计算耗时约为4.203s，普通顺序计算耗时约为11.263s，直接给定三个任务的条件下并行计算耗时相较普通顺序计算耗时大大减少。
+
+本节中案例显示，要使用python实现并行计算，要注意以下两点：
+
+     - 待执行任务应写为完整的函数形式，方便并行计算时的调用
+     
+     - 使用`multiprocessing`模块实现并行计算
+
+由于并行计算同时使用多个处理器进行任务处理，理论上并行计算耗时应为普通顺序计算耗时的$1/处理器数量$倍。但本节中给出的案例及其变形案例中，该理论结果并未完全实现。这种现象的产生是系统耗时的影响。当任务过多、任务分配复杂时，由于系统耗时的增加，并行计算在计算时间上并不能显现出明显的优势。
+
+为直观展示并行计算系统耗时随并行计算处理器数量的变化，在系统稳定、任务平均分配的假设下，使用以下python代码绘制原始案例并行计算耗时相应图像：
+
+       if __name__ == "__main__":
+           poolnum = []
+           costtm = []
+           for i in range(1, 9):
+               time1 = time.time()
+               gothrough('F:\\')
+               time2 = time.time()
+               pool = mp.Pool(i)
+               time3 = time.time()
+               for curdir, dirs, files in os.walk('F:\\'):
+                   a = [os.path.join(curdir, i) for i in dirs]
+                   pool.map(gothrough, a)
+                   pool.close()
+                   pool.join()
+                   break
+               time4 = time.time()
+               singletime = (time2 - time1) / i
+               multitime = time4 - time3
+               costtime = multitime - singletime
+               poolnum = poolnum+[i]
+               costtm = costtm+[costtime]
+
+           print('Pool numbers:', poolnum)
+           print('Cost time :', costtm)
+           plt.plot(poolnum, costtm, 'ro-')
+           plt.ylabel('time')
+           plt.xlabel('number of pools')
+           plt.show()
+
+所绘制图像如下：
+![原始案例并行计算耗时随进程数变化图](D:/研究生/研究生课程/大数据分布式/整理优秀代码/第一节0917/案例耗时.png)
+
+经计算在上述原始案例代码中，分配任务数为7。上述图像显示，随着并行进程数的不断增加，系统耗时不断增多，并行进程数为7时增加幅度减小但仍呈现增加趋势。
+对变形案例并行计算耗时绘制相应图像，python代码如下：
+
+       if __name__ == '__main__':
+           filedir = 'F:\\'
+           findword = ['win', 'bin', 'to']
+           numtask = len(findword)
+           poolnum = []
+           costtm = []
+           for i in range(1, 9):
+               time1 = time.time()
+               for word in findword:
+                   file = find_specific_file(filedir, word)
+               time2 = time.time()
+               pool = mp.Pool(i)
+               time3 = time.time()
+               rel = pool.starmap_async(find_specific_file, 
+                                        iterable=[(filedir, word) for word in findword]).get()
+               pool.close()
+               pool.join()          
+               time4 = time.time()
+               singletime = (time2 - time1) / i
+               multitime = time4 - time3
+               costtime = multitime - singletime
+               poolnum = poolnum+[i]
+               costtm = costtm+[costtime]
+
+           print('Pool numbers:', poolnum)
+           print('Cost time :', costtm)
+           plt.plot(poolnum, costtm, 'ro-')
+           plt.ylabel('time')
+           plt.xlabel('number of pools')
+           plt.show()
+
+所绘制图像如下：
+![变形案例并行计算耗时随进程数变化图](D:/研究生/研究生课程/大数据分布式/整理优秀代码/第一节0917/三任务系统耗时.png)
+
+上述图像显示，在直接分配三个任务的变形案例下，在并行进程数为3时并行计算耗时有大幅下降，此时每个处理器可单独处理一个任务，任务在系统中的分配、传输所需时间最小。此后随着并行进程数的增加并行计算耗时不断增加。
+
+
+
+
+
+
