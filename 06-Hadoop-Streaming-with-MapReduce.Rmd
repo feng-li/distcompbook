@@ -1,7 +1,6 @@
 # Hadoop Streaming
 
-Hadoop上运行MapReduce
----------------------
+## Hadoop上运行MapReduce
 
 ### 通过Hadoop Streaming运行MapReduce
 
@@ -85,3 +84,169 @@ Hadoop Pipe语法为
 
 这里再不做过多介绍， 感兴趣的读者可以参考
 Hadoop官方文档或者[@white2012hadoop]、@sammer2012hadoop。
+
+### 案例：单词计数
+
+尝试使用MapReduce对文本文件数据中的单词进行计数(仅考虑原文本文件中不含标点符号，单词间使用空格分隔的情况)。
+hadoop streaming允许用户提交不同脚本语言实现的MapReduce函数，这使得MapReduce过程可以使用不同脚本语言呈现，方便用户的使用操作。
+本案例中`map`函数实现的功能为将文本文件中句子切分为单词，并将切分出的单词分别于1配对，以`word 1`的形式进行标准输出。下例中分别展示用python、R、bash语言实现的map函数。
+使用python语言实现的map函数`map.py`：
+
+       #! /usr/bin/env python3
+       import sys
+       wordcount={}
+       for line in sys.stdin:
+           line=line.strip()
+           words=line.split(' ')
+       for word in words:
+           print('%s\t%s'% (word,1))
+
+使用R语言实现的map函数`map.R`：
+
+       #! /usr/bin/env Rscript
+       input <- file('stdin','r')
+       while(length(currentline <- readLines(input, n = 1, warn = FALSE)) > 0)
+       {
+           words = unlist(strsplit(currentline,' '))
+           for(i in 1:length(words)){
+               cat(words[i], 1, '\n', sep = ' ')
+           }
+       }
+
+用bash语言实现的map函数`map.sh`：
+
+        #! /usr/bin/env bash
+        while read LINE; do
+          for word in $LINE
+          do
+            echo "$word 1"
+          done
+        done
+
+本案例中`reduce`函数实现的功能为接受`map`函数输出的`word 1`的数值对，并根据不同单词进行计数，计算出每个单词出现的次数。可使用如下python代码`reduce.py`实现该过程：
+
+       #! /usr/bin/env python3
+       import sys
+       form operator import itemgetter
+       wordcount = {}
+       
+       for line in sys.stdin:
+           line = line.strip()
+           word,count = line.split(' ')
+           count = int(count)
+           wordcount[word] = wordcount.get(word,0) + count
+           
+       sorted_wordcount = sorted(wordcount.items(),key = itemgetter(0))
+       
+       for word,count in sorted_wordcount:
+           print('%s\t%s'%(word,count))
+       
+编写运行函数`main.sh`，在hadoop上实现上述MapReduce过程的运行。相应的bash代码如下所示，示例中使用python编写的map和reduce函数：
+
+       #!/bin/bash
+
+       PWD=$(cd $(dirname $0); pwd)
+       cd $PWD 1> /dev/null 2>&1
+
+       TASKNAME=word_count_1 
+
+       HADOOP_INPUT_DIR=/user/devel/example/word_count.txt  #the input text to be dealed
+       HADOOP_OUTPUT_DIR=/user/devel/example/output         #the directory of the output
+
+       echo $HADOOP_INPUT_DIR
+       echo $HADOOP_OUTPUT_DIR
+
+       hadoop fs -rm -r $HADOOP_OUTPUT_DIR
+
+       hadoop jar $HADOOP_HOME/share/hadoop/tools/lib/hadoop-streaming-3.1.3.jar \
+           -D mapred.job.name=TASKNAME \
+           -D mapred.job.priority=NORMAL \
+           -D stream.memory.limit=1000 \
+           -D mapred.map.tasks=10 \
+           -D mapred.reduce.tasks=7 \
+           -D mapred.job.map.capacity=100 \
+           -D mapred.job.map.capacity=100 \
+           -input ${HADOOP_INPUT_DIR} \
+           -output ${HADOOP_OUTPUT_DIR} \
+           -mapper "python3 map.py" \
+           -reducer "python3 reduce.py" \
+           -file "$PWD/map.py" "$PWD/reduce.py"
+
+       if [ $? -ne 0 ]; then
+           echo 'error'
+           exit 1
+       fi
+       
+       hadoop fs -touchz ${HADOOP_OUTPUT_DIR}/done
+
+       exit 0
+
+如果用户有多个运行结构相同的map函数或reduce函数需要一一测试，如上述提到的`map.py`、`map.R`与`map.sh`，可以在编写`main.sh`时进行改动，使得其能够接受不同的函数进行相同的操作。相应代码如下：
+
+       #!/bin/bash
+       
+       #add the time record for the MapReduce process
+       echo '>>>>>>>>>>>>>>>> start:' `date`
+       BEGIN_TIME=`date +%s`
+
+       set -u
+
+       #receive the needed files
+       num=$#
+       if [ $num -ne 4 ]; then
+           echo -e "This program is designed for 1 mapper + 1 reducer + 1 inputfile."
+           echo -e "please input the mapper file,reducer file ,input file and output path: sh main.sh mapper reducer inputfile outputpath\n"
+           exit 1
+       else
+           MAPPER=${1}
+           REDUCER=${2}
+           INPUTFILE=${3}
+           OUTPUTPATH=${4}
+       fi
+
+
+       PWD=$(cd $(dirname $0); pwd)
+       cd $PWD 1> /dev/null 2>&1
+
+       TASKNAME=word_count_2
+
+       HADOOP_PREFIX=/user/devel/example
+       HADOOP_INPUT_DIR=${HADOOP_PREFIX}/${INPUTFILE}
+       HADOOP_OUTPUT_DIR=${HADOOP_PREFIX}/${OUTPUTPATH}
+
+       echo $HADOOP_INPUT_DIR
+       echo $HADOOP_OUTPUT_DIR
+
+       hadoop fs -rmr $HADOOP_OUTPUT_DIR 
+
+       hadoop jar $HADOOP_HOME/share/hadoop/tools/lib/hadoop-streaming-3.1.3.jar \
+           -jobconf mapred.reduce.tasks=1 \
+           -input ${HADOOP_INPUT_DIR} \
+           -output ${HADOOP_OUTPUT_DIR} \
+           -file ${MAPPER} ${REDUCER} \
+           -mapper ${MAPPER} \
+           -reducer ${REDUCER}
+
+       if [ $? -ne 0 ]; then
+           echo 'error'
+           exit 1
+       fi
+       
+       hadoop fs -touchz ${HADOOP_OUTPUT_DIR}/done
+
+       #record the end time and print the cost time
+       END_TIME=`date +%s`
+
+       echo '******Total cost '  $(($END_TIME-$BEGIN_TIME)) ' seconds'
+       echo '>>>>>>>>>>>>>>>> end:' `date`
+       echo "=============SUCCESSFUL============="
+
+       exit 0
+
+使用上述运行文件时，应传入四个参数，分别为map函数、reduce函数、输入的待处理文件与结果输出路径，可直接使用如下代码调用`map.R`与`reduce.py`，处理`/user/devel/example/word_count.txt`文件，并将输出结果保存至`/user/devel/example/output`文件夹内。
+
+       sh main.sh map.R reduce.py word_count.txt output
+
+
+
+
