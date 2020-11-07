@@ -1,6 +1,6 @@
 # 基于MapReduce的统计建模
 
-### 什么任务适合使用MapReduce？
+## 什么任务适合使用MapReduce？
 
 基于Hadoop的MapReduce主要用于进行数据处理(processing data)，如对数据进行的初始加工，得到原始数据后进行必要变量的导出，对数据进行必要清理，对文本数据进行情感的标注，对图像数据进行简单的图片识别等。适合使用MapReduce实现的功能有以下几种：
 排序(Sorting)。MapReduce非常适合进行排序和归类汇总，因为MapReduce的过程中存在排序机制，经过map过程处理后的数据在进入到reduce过程之前会根据key/value对中的key值进行排序，用户也可以指定进行排序的特征。
@@ -10,7 +10,7 @@
 
 除上述提到的具体功能外，MapReduce还适合对所有的独立数据的处理，如果进行大规模的独立性数据的操作，Hadoop的MapReduce是不二的选择，因为其具有廉价且处理速度快的优势。
 
-### MapReduce-容错
+## MapReduce-容错
 
 在处理大型数据时，数据中某些记录出现错误是不可避免的。虽然我们在编写程序时会尽可能的考虑到可能出错的情况并对其进行处理，保证程序的健壮性和鲁棒性，但还是应该设置一种恢复机制来处理无法计划的错误情况，因为我们并不希望仅仅因为一条程序无法处理的不良记录造成整个任务的失败。
 
@@ -22,12 +22,12 @@ Hadoop MapReduce提供了一项功能，允许跳过它认为会导致任务崩�
 程序中应该考虑容错的情况可能有以下几种：首先，在使用Python或R中特殊的数据结构(比如R中的dataframe或Python中的pandas)来处理数据时，处理后的结果中会出现对应数据结构的特殊标记，如果没有对相应数据标记进行处理，再次处理数据时就会出现数据不符合要求的问题。其次，Hadoop储存数据时不建议数据添加表头，因为表头在数据处理时会被当做一行数据进行处理，容易导致任务运行出现异常。在存储数据时可以将表头单独储存为一个文件，供用户使用时进行参考。另外，在程序编写中要注意不同语言的编码，避免因为语言编码的不适配导致程序运行中出现错误。
 
 
-### 使用MapReduce进行线性回归
+## 使用MapReduce进行线性回归
 假设我们有一个大型数据集，该数据集体量巨大，占用计算机的大量内存，且用传统单机方式进行线性回归时需要大量时间，现在我们将如何对该大型数据集进行回归分析？
 
 通过使用Mapper和Reducer，Hadoop MapReduce可以用于实现大型数据集的线性回归。MapReduce将大型数据集拆分成多个数据块分发到可用节点之上，使用节点并行处理分布式数据。当我们使用Hadoop进行大数据集的线性回归运算时不会引发内存问题，因为该大型数据集将在Hadoop计算节点之间进行分发和处理，且能够大大缩短处理数据所用时间。使用这种方法实现的线性回归不能提供比`lm()`模型更高的预测精度，其精度与传统方法相同。
 
-#### 线性回归模型回顾
+### 线性回归模型回顾
 假设待处理的数据集中包含因变量$y_{n\times 1}$与自变量$X_{n\times p}$，对数据构建线性回归模型如下：$$y=X\beta +\epsilon$$
 待估系数$\widehat \beta$的解析解为：$$\widehat\beta = (X'X)^{-1}X'y$$
 进行线性回归最大的问题就是求出待估系数$\widehat \beta$。
@@ -35,7 +35,7 @@ Hadoop MapReduce提供了一项功能，允许跳过它认为会导致任务崩�
 
 使用MapReduce进行线性回归是相对容易的，因为待估系数$\widehat \beta$具有解析解，只需使用MapReduce将解析解求出即可。对于待估系数没有解析解的其他模型(如下面将介绍的logistic回归模型)，使用MapReduce求解较为复杂。
 
-#### 线性回归模型的MapReduce实现原理
+### 线性回归模型的MapReduce实现原理
 
 首先来看一个简单的例子，假设待处理的数据集中包含因变量$y_{n\times 1}$与自变量$X_{n\times 1}$，$X'y$的计算可以写作： $$X'y = \begin{bmatrix}
           x_{1.}\\
@@ -60,9 +60,66 @@ $$ X'X = X'
         \end{bmatrix}$$
 而$X'x_{.i}$的计算方法与$X'y$的计算方法完全相同。由此，我们可以使用MapReduce实现$X'X$和$X'y$的计算.
 
+### 案例：线性回归模型的MapReduce实现
 
-### 使用MapReduce进行logistic回归
-#### logistic回归模型回顾
+使用MapReduce进行大量数据的线性回归。进行线性回归的数据中自变量个数为$p$，数据量为$n$，且满足$n>>p$。
+根据多元回归原理公式，将计算回归系数公式分为两部分，$X'y$部分和$X'X$计算部分，在mapper上计算两个部分。首先$X'y$计算是按行分割后在每个节点上计算$(x_{i1}y_i,x_{i2}y_i,...,x_{ip}y_i)$。对于$X'X$部分，$X$被分成$p$个列向量分别与$X'$进行计算，计算方式与$X'y$相同。将每个节点两个部分计算结果合并成一行，先在每个节点将所有向量相加，再进行流输出到reducer中，进行加总合并，并重新恢复成矩阵，计算beta。
+计算过程的代码实现如下，代码由python实现。
+map过程：
+
+       #! /usr/bin/python3
+       
+       import sys
+       import numpy as np
+       
+       lenline = 0
+       for line in sys.stdin:
+           line = line.strip()
+           line = line.split(',')
+           if lenline == 0:
+               lenline = len(line)
+               sumtrx = np.zeros(lenline*(lenline+1))
+           arr1 = np.asarray(line, dtype=float)
+           arr2 = np.asarray(line[1: ], dtype=float)
+           arr1 = np.insert(arr1, 1, 1).reshape(lenline+1, 1)
+           arr2 = np.insert(arr2, 0, 1).reshape(1, lenline)
+           mtrx = arr1.dot(arr2)
+           mtrx = mtrx.flat
+           sumtrx = sumtrx + mtrx
+       print(list(sumtrx))
+
+reduce过程：
+
+       #! /usr/bin/python3
+       
+       import sys
+       import numpy as np
+
+       length = 0
+       for line in sys.stdin:
+           line = line.strip()
+           line = line.strip('[]')
+           line = line.split(',')
+           if length == 0:
+               length = len(line)
+               suml = np.zeros(length)
+           line = np.asarray(line, dtype= float)
+           suml = suml +line
+       
+       suml = np.asarray(suml)
+       n = int((4*length)**0.5/2)
+       if (n+1)*n != length:
+           stop('length of the input is not true')
+       summtrx = suml.reshape(n+1, n)
+       [xy, xx] = np.split(summtrx, [1, ], axis=0)
+
+       beta = np.dot(np.linalg.inv(xx), xy.transpose())
+       print(beta.reshape(1, len(beta)))
+
+在使用上述代码进行求解的过程中，若设置多个reduce任务，求出的beta值可能会有多组，这时可能需要通过在本地求平均等方式对其进行处理得到最终的beta结果。
+
+## 使用MapReduce进行logistic回归
+### logistic回归模型回顾
 在统计中，logistic回归(或logit回归)是一种概率分类模型，Logistic回归已在包括医学和社会科学领域在内的许多学科中得到广泛应用。
 logistic回归分为二分类logistic回归和多分类logistic回归，二分类logistic回归的因变量的结果具有两种可能的类型，多分类logistic回归因变量的结果具有三种或多种可能的类型。logistic回归可以通过构建logistic函数来实现。
 
@@ -72,7 +129,7 @@ logistic回归分为二分类logistic回归和多分类logistic回归，二分�
 logistic回归与普通线性回归的显著区别是不能通过解析解对其模型中的待估系数作出估计，只能采用牛顿迭代等迭代方法求出待估系数。在传统统计方法中，可以使用R中的`glm()`函数或Python中的`sklearn.linear_model.LogisticRegression()`函数轻松地对logistic回归模型的待估系数进行估算。但是对于大量数据的logistic回归处理而言存在一定困难。首先，由于logistic回归模型的待估系数不具有解析解，线性回归的MapReduce实现方法不能用于解决logistic回归问题，而需要大量数据交换的牛顿迭代等迭代过程对MapReduce而言是不容易实现的。
 Logistic回归在标准行业内非常重要，是许多生产欺诈检测，广告质量和针对性产品检验的基础，目前企业处理Logistic回归最常见的实现方式是对所有要使用的大型训练集使用随机梯度下降（SGD），这种方法处理速度非常快，适合应用于大型数据的处理。但是，目前企业几乎不会使用Hadoop进行Logistic回归处理，大多数企业会使用spark等更高级的平台，在这些更高级的平台上处理Logistic回归获得的结果与传统单机方式能够达到一致。
 
-#### logistic回归模型的MapReduce实现原理
+### logistic回归模型的MapReduce实现原理
 由于使用MapReduce对logistic回归进行处理存在一定困难，在使用MapReduce进行相关计算时就要进行一定的取舍，通过舍弃一部分精确度求得待估系数近似的估计值。
 
 使用MapReduce进行logistic回归模型处理时，首先仍会将𝑛个样本划分为𝑘个块，每个块由𝑚个观测值组成，每一个数据块会被分配到不同的节点上进行计算处理。
@@ -82,3 +139,5 @@ Logistic回归在标准行业内非常重要，是许多生产欺诈检测，广
 
 使用上述方法进行logistic回归是存在一定的劣势的。首先，上述方法得到的估计值的方差表达式为：$$Var(\widehat \beta)=\frac{1}{k^2}\sum_{l=1}^k{Var(\widehat \beta_l)}$$
 只要单个节点的方差的增加速度比$k^2$快，那么整体的方差会随着$k$的增加而变大，估计结果的准确性会受到影响。其次，$\widehat \beta$的估计值会受到$k$取值的影响，$k$取不同值时所估计的结果会不同。
+
+
