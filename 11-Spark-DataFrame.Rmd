@@ -237,7 +237,7 @@ Spark内的NA与null是不同的，NA为缺失值而null为空值，上述操作
 还可以使用`cov`函数计算某两列的协方差。`cov`函数计算给定列（由其名称指定）的样本协方差，结果为双精度值。
 `cov`函数的一般形式为：
 
-     corr(col1, col2)
+     cov(col1, col2)
 其中，参量col1、col2分别为第一列、第二列的名称。
 
 计算air数据Distance与ArrDelay列的协方差的命令示例如下：
@@ -327,5 +327,248 @@ Grouped map UDF定义了一个转换：由一个pandas.DataFrame转换为另一�
 本部分中对Spark DataFrame的部分操作进行了介绍，若想了解更多操作，可通过查询`PySpark documentation`查看`pyspark.sql module`部分的相关内容。
 
 
+## 案例：Airdelay数据处理
+对于给定的airdealy_small.csv数据集，对该数据集中部分哑变量进行处理使之能用于后续的建模。
+在spark上对相关数据进行处理之前，需要了解哑变量的信息。因此，使用如下函数在本地节点上统计哑变量的信息。
 
+       #!/usr/bin/env python3
+       import pickle
+       import pandas as pd
+       import numpy as np
+       import os
+       import sys
+       import re
+       from collections import Counter
 
+       def dummy_factors_counts(pdf, dummy_columns):
+           '''Function to count unique dummy factors for given dummy columns
+           pdf: pandas data frame
+           dummy_columns: list. Numeric or strings are both accepted.
+           return: dict same as dummy columns
+           '''
+           # Check if current argument is numeric or string
+           pdf_columns = pdf.columns.tolist()  # Fetch data frame header
+       
+           dummy_columns_isint = all(isinstance(item, int) for item in dummy_columns)
+           if dummy_columns_isint:
+               dummy_columns_names = [pdf_columns[i] for i in dummy_columns]
+           else:
+               dummy_columns_names = dummy_columns
+       
+           factor_counts = {}
+           for i in dummy_columns_names:
+               factor_counts[i] = (pdf[i]).value_counts().to_dict()
+       
+           return factor_counts
+       
+       
+       def cumsum_dicts(dict1, dict2):
+           '''Merge two dictionaries and accumulate the sum for the same key where each dictionary
+           containing sub-dictionaries with elements and counts.
+           '''
+           if len(dict1) == 0:
+               dict_new = dict2
+           elif len(dict2) == 0:
+               dict_new = dict1
+           else:
+               dict_new = {}
+               for i in dict1.keys():
+                   dict_new[i] = dict(Counter(dict1[i]) + Counter(dict2[i]))
+       
+           return dict_new
+       
+       
+       def select_dummy_factors(dummy_dict, keep_top, replace_with, pickle_file):
+           '''Merge dummy key with frequency in the given file
+           dummy_dict: dummy information in a dictionary format
+           keep_top: list
+           '''
+           dummy_columns_name = list(dummy_dict)
+       
+           factor_set = {}  # The full dummy sets
+           factor_selected = {}  # Used dummy sets
+           factor_dropped = {}  # Dropped dummy sets
+           factor_selected_names = {}  # Final revised factors
+       
+           for i in range(len(dummy_columns_name)):
+       
+               column_i = dummy_columns_name[i]
+       
+               factor_set[column_i] = list((dummy_dict[column_i]).keys())
+       
+               factor_counts = list((dummy_dict[column_i]).values())
+               factor_cumsum = np.cumsum(factor_counts)
+               factor_cumpercent = factor_cumsum / factor_cumsum[-1]
+       
+               factor_selected_index = np.where(factor_cumpercent <= keep_top[i])
+               factor_dropped_index = np.where(factor_cumpercent > keep_top[i])
+       
+               factor_selected[column_i] = list(
+                   np.array(factor_set[column_i])[factor_selected_index])
+       
+               factor_dropped[column_i] = list(
+                   np.array(factor_set[column_i])[factor_dropped_index])
+       
+               # Replace dropped dummies with indicators like `others`
+               if len(factor_dropped_index[0]) == 0:
+                   factor_new = []
+               else:
+                   factor_new = [replace_with]
+       
+               factor_new.extend(factor_selected[column_i])
+       
+               factor_selected_names[column_i] = [
+                   column_i + '_' + str(x) for x in factor_new
+               ]
+       
+           dummy_info = {
+               'factor_set': factor_set,
+               'factor_selected': factor_selected,
+               'factor_dropped': factor_dropped,
+               'factor_selected_names': factor_selected_names
+           }
+       
+           pickle.dump(dummy_info, open(pickle_file, 'wb'))
+           print("dummy_info saved in:\t" + pickle_file)
+       
+           return dummy_info
+       
+       
+       def select_dummy_factors_from_file(file, header, dummy_columns, keep_top,
+                                          replace_with, pickle_file):
+           '''Memory constrained algorithm to select dummy factors from a large file
+           '''
+       
+           dummy_dict = {}
+           buffer_num = 0
+           with open(file) as f:
+               while True:
+                   buffer = f.readlines(
+                       1024000)  # Returns *at most* 1024000 bytes, maybe less
+                   if len(buffer) == 0:
+                       break
+                   else:
+                       buffer_list = [x.strip().split(",") for x in buffer]
+       
+                       buffer_num += 1
+                       if ((buffer_num == 1) & (header is True)):
+                           buffer_header = buffer_list[0]
+                           buffer_starts = 1
+                       else:
+                           buffer_starts = 0
+       
+                       buffer_pdf = pd.DataFrame(buffer_list[buffer_starts:])
+                       if header is True:
+                           buffer_pdf.columns = buffer_header
+       
+                       dummy_dict_new = dummy_factors_counts(buffer_pdf,
+                                                             dummy_columns)
+       
+                       dummy_dict = cumsum_dicts(dummy_dict, dummy_dict_new)
+       
+           dummy_info = select_dummy_factors(dummy_dict, keep_top, replace_with,
+                                             pickle_file)
+           return (dummy_info)
+       
+       
+       if __name__ == "__main__":
+       
+           # User settings
+           file = os.path.expanduser("~/data/airdelay_small.csv")
+           header = True
+           dummy_columns = [
+               'Year', 'Month', 'DayOfWeek', 'UniqueCarrier', 'Origin', 'Dest'
+           ]
+           keep_top = [1, 1, 1, 0.8, 0.8, 0.8]
+           replace_with = 'others'
+           pickle_file = os.path.expanduser(
+               "~/example/spark/_dummy_info.pkl")
+       
+           dummy_info = select_dummy_factors_from_file(file, header, dummy_columns,
+                                                       keep_top, replace_with,
+                                                       pickle_file)
+上述代码可用于在本地处理大量数据的哑变量信息的读取，这是由于其`select_dummy_factors_from_file()`函数中将大量数据分块读入，每一个buffer块中最多读入1024000行数据，使用`dummy_factors_counts()`函数依次处理，获取该块数据的哑变量信息，之后使用`cumsum_dicts()`函数将所有buffer块的哑变量信息集合起来，再使用`select_dummy_factors()`函数，根据给出的保留哑变量取值的比率（keep_top）得到所有哑变量取值的信息，并保存至事先建立好的pickle文件中（pickle_file）。
+使用上述方法统计的哑变量信息，可以借助spark实现对哑变量的处理，处理代码如下：
+
+       #!/usr/bin/env python3.6
+       import findspark
+       findspark.init("/usr/lib/spark-current")
+       import pyspark
+       from pyspark.sql import SparkSession
+       from pyspark.sql import functions as F
+       import os 
+       import pickle
+       
+       # create SparkSession
+       spark = SparkSession.builder.appName("Python Spark with DataFrame").getOrCreate()
+       schema_sdf = StructType([
+                StructField('Year', IntegerType(), True),
+                StructField('Month', IntegerType(), True),
+                StructField('DayofMonth', IntegerType(), True),
+                StructField('DayOfWeek', IntegerType(), True),
+                StructField('DepTime', DoubleType(), True),
+                StructField('CRSDepTime', DoubleType(), True),
+                StructField('ArrTime', DoubleType(), True),
+                StructField('CRSArrTime', DoubleType(), True),
+                StructField('UniqueCarrier', StringType(), True),
+                StructField('FlightNum', StringType(), True),
+                StructField('TailNum', StringType(), True),
+                StructField('ActualElapsedTime', DoubleType(), True),
+                StructField('CRSElapsedTime',  DoubleType(), True),
+                StructField('AirTime',  DoubleType(), True),
+                StructField('ArrDelay',  DoubleType(), True),
+                StructField('DepDelay',  DoubleType(), True),
+                StructField('Origin', StringType(), True),
+                StructField('Dest',  StringType(), True),
+                StructField('Distance',  DoubleType(), True),
+                StructField('TaxiIn',  DoubleType(), True),
+                StructField('TaxiOut',  DoubleType(), True),
+                StructField('Cancelled',  IntegerType(), True),
+                StructField('CancellationCode',  StringType(), True),
+                StructField('Diverted',  IntegerType(), True),
+                StructField('CarrierDelay', DoubleType(), True),
+                StructField('WeatherDelay',  DoubleType(), True),
+                StructField('NASDelay',  DoubleType(), True),
+                StructField('SecurityDelay',  DoubleType(), True),
+                StructField('LateAircraftDelay',  DoubleType(), True)
+            ])
+            
+       # read the file and select varibles used
+       air = spark.read.options(header='true').schema(schema_sdf).csv("/data/airdelay_small.csv")
+       air_1 = air.select(['Arrdelay','Year','Month','DayofMonth','DayOfWeek','DepTime','CRSDepTime','CRSArrTime','UniqueCarrier','ActualElapsedTime','Origin','Dest','Distance'])
+       
+       # drop NA values and deal with the dependent variable
+       air_1 = air_1.na.drop()
+       data = air.withColumn('Arrdelay',F.when(air['Arrdelay'] > 0, 1).otherwise(0))
+       
+       # get the dummy information and deal with dummies
+       dummy_info_path = "~/students/2020210972bicheng/spark/_dummy_info.pkl"
+       dummy_info = pickle.load(open(os.path.expanduser(dummy_info_path), "rb"))
+       
+       for i in dummy_info['factor_dropped'].keys():
+           if len(dummy_info['factor_dropped'][i]) > 0:
+               data = data.replace(dummy_info['factor_dropped'][i], 'others', i)
+       
+       year = [int(i) for i in dummy_info['factor_selected']['Year']]
+       month = [int(i) for i in dummy_info['factor_selected']['Month']]
+       dayofweek = [int(i) for i in dummy_info['factor_selected']['DayOfWeek']]
+       uc = [i for i in dummy_info['factor_selected']['UniqueCarrier']]+['others']
+       ori = [i for i in dummy_info['factor_selected']['Origin']]+['others']
+       dest = [i for i in dummy_info['factor_selected']['Dest']]+['others']
+       
+       
+       exprs_year = [F.when(F.col("Year") == i, 1).otherwise(0).alias('year_'+str(i)) for i in year]
+       exprs_month = [F.when(F.col("Month") == i, 1).otherwise(0).alias('month_'+str(i)) for i in month]
+       exprs_dayofweek = [F.when(F.col("DayOfWeek") == i, 1).otherwise(0).alias('dayofweek_'+str(i)) for i in dayofweek]
+       exprs_uc = [F.when(F.col("UniqueCarrier") == i, 1).otherwise(0).alias('uc_'+i) for i in uc]
+       exprs_ori = [F.when(F.col("Origin") == i, 1).otherwise(0).alias('ori_'+i) for i in ori]
+       exprs_dest = [F.when(F.col("Dest") == i, 1).otherwise(0).alias('dest_'+i) for i in dest]
+       
+       exprs = exprs_year+exprs_month+exprs_dayofweek+exprs_uc+exprs_ori+exprs_dest
+       
+       data = data.select('Arrdelay','DayofMonth','DepTime','CRSDepTime','CRSArrTime','ActualElapsedTime','Distance',*exprs)
+       # shape (5423403, 155) 
+       print((data.count(), len(data.columns)))
+       
+       # save the final data
+       data.coalesce(1).write.option('header','true').csv('dummy_data')       
