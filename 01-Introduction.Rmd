@@ -234,7 +234,7 @@ Hive, Spark, Storm。
            plt.show()
 
 所绘制图像如下：
-![costtime2](https://github.com/feng-li/distcompbook/blob/master/images/costtime2.png)
+![costtime2](images/costtime2.png)
 
 上述图像显示，在直接分配三个任务的变形案例下，在并行进程数为3时并行计算耗时有大幅下降，此时每个处理器可单独处理一个任务，任务在系统中的分配、传输所需时间最小。此后随着并行进程数的增加并行计算耗时不断增加。
 
